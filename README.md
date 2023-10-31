@@ -38,3 +38,8 @@ The structure :
 |   |-- test_menu.py
 
 |-- Main.py
+
+
+## erd diagram:
+
+<p align="center"><img src="C:\Users\Mediarayan\Desktop\MySQL_demo_physical_data_model.png" alt="erd_diagram"> </p>
