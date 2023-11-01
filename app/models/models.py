@@ -33,8 +33,8 @@ class Paient:
         self.users_user_id = users_user_id
 
 
-class Visit_From:
-    def __init__(self, form_id, doctor_doctor_id, paient_paient_id, form_name, visit_date, visit_desc, hospitalization, duration_of_hospitalization):
+class Visit_Form:
+    def __init__(self, form_id, doctor_doctor_id, paient_paient_id, form_name, visit_date, visit_desc,medical_record_id ,hospitalization=False, duration_of_hospitalization=0):
         self.form_id = form_id
         self.doctor_doctor_id = doctor_doctor_id
         self.paient_paient_id = paient_paient_id
@@ -43,6 +43,7 @@ class Visit_From:
         self.visit_desc = visit_desc
         self.hospitalization = hospitalization
         self.duration_of_hospitalization = duration_of_hospitalization
+        self.medical_record_id = medical_record_id
 
 
 class Paient_Bill:
@@ -52,16 +53,12 @@ class Paient_Bill:
         self.date = date
         self.total_amount = total_amount
         self.paient_share = paient_share
-        self.amount_paid = amount_paid
-        self.the_remaining_amount = the_remaining_amount
         self.insurance_contribution = insurance_contribution
 
 
 class Medical_Record:
-    def __init__(self, record_id, paient_id, doctor_id, date_of_visit, doctor_doctor_id, paient_paient_id):
+    def __init__(self, record_id, paient_id, doctor_id, date_of_visit):
         self.record_id = record_id
         self.paient_id = paient_id
         self.doctor_id = doctor_id
-        self.date_of_visit = date_of_visit
-        self.doctor_doctor_id = doctor_doctor_id
-        self.paient_paient_id = paient_paient_id
+        self.date_of_record = date_of_visit
