@@ -14,7 +14,29 @@ class Authentication:
     def check_password(self, hashed_password, input_password):
         return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
 
+    def doctor_registration():
+        pass
 
+    def patient_registeration():
+            pass
+
+    def login_patient():
+            print("login patient")
+            return True
+            
+        
+        
+
+    def login_doctor():
+            print("login doctor")
+            return True
+            
+        
+            
+
+    def login_admin():
+            print("login admin")
+            return True
 
 
 #---------------------------------------------------------------------------------------------------

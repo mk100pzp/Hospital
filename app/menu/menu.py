@@ -57,7 +57,7 @@ enter=[{
                             "children":[{
                                     "function":[pro1_operator.login_patient],
                                     "name":"get visit time",
-                                    "action":[pro1_operator.get_visit_time]
+                                    "action":[pro1_operator.get_visit_time,pro1_operator.create_medical_record]
                                     },
 
 
@@ -125,6 +125,10 @@ enter=[{
                                         "name":"income of hospital",
                                     "action":[pro1_operator.income_hospital]
                                     },
+                                    {   "function":[pro1_operator.login_admin],
+                                        "name":"show log ",
+                                    "action":[pro1_operator.show_log]
+                                    }
 
                                                             ]
                                                         
