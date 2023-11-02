@@ -8,7 +8,7 @@ class User:
         self.role = role
 
 
-class Admin:
+class Admin(User):
     def __init__(self, admin_id, users_user_id):
         self.admin_id = admin_id
         self.users_user_id = users_user_id
@@ -18,7 +18,7 @@ class Admin:
 
     
 
-class Doctor:
+class Doctor(User):
     def __init__(self, doctor_id, experties, work_experienceit, salary, address, visit_price, users_user_id):
         self.doctor_id = doctor_id
         self.experties = experties
@@ -37,7 +37,7 @@ class Doctor:
 
 
 
-class Paient:
+class Paient(User):
     def __init__(self, paient_id, paient_name, paient_address, users_user_id):
         self.paient_id = paient_id
         self.paient_name = paient_name

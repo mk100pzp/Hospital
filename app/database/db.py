@@ -1,4 +1,5 @@
 import psycopg2
+import bcrypt
 
 class Database:
 
@@ -31,12 +32,29 @@ class Database:
             print(f"Error : {e}")
 
 
+
+
+
     def close_connection(self):
         if self.connection:
             self.cursor.close()
             self.connection.close()
+
+    @staticmethod
+    def check_password(hashed_password, input_password):
+            return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
+    
+    #=================================================================================================
+
+    # اسم کاربری و پسورد رو با ورودی مقایسه کند و اگر چنین دکتری وجود داشت ترو را برگداند
+    #برای مقایسه از تابع چک پسورد استفاده کند
+    def check_exist(table_name, username, password):
+           pass
+    
+    #=================================================================================================
+    
     def save_doctor(obj):
-        pass
+            pass
     def save_admin():
             pass
     def save_patient(obj):
