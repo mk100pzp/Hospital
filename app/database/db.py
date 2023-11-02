@@ -51,8 +51,8 @@ class Database:
     def cancel_database_visit_time(obj):
             # set null in patient id clumn of visit time table
             pass
-    def catched_visit_time(ip_patient):
-            # show all visit time for ip_patient
+    def catched_visit_time():
+            # show all visit time for id_patient
 
             pass
     def save_patient_bill():
@@ -92,3 +92,11 @@ class Database:
             pass
     def save_medical_record(obj):
            pass
+    
+    # ......
+    
+    def show_log_info():
+            pass
+
+    def show_log_error():
+            pass

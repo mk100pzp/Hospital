@@ -1,4 +1,7 @@
-import pro1_operator
+from app.authentication import auth
+from app.database import db
+from app.models import models
+
 enter=[{
 "name":"main",
 "children":[{
@@ -6,13 +9,13 @@ enter=[{
         "children":[
                         {
                             "name":"doctor",
-                            "action":[pro1_operator.doctor_registration],
+                            "action":[auth.doctor_registration],
                             
 
                         },
                         {
                             "name":"patient",
-                            "action":[pro1_operator.patient_registeration],
+                            "action":[auth.patient_registeration],
                             
                         },
                         
@@ -30,8 +33,8 @@ enter=[{
                            
                            "children":[{
                                         "name":"add visit time",
-                                        "function":[pro1_operator.login_doctor],
-                                        "action":[pro1_operator.add_visit_time]
+                                        "function":[auth.login_doctor],
+                                        "action":[db.add_visit_time]
                                         },
 
 
@@ -39,13 +42,13 @@ enter=[{
                                     
                                         {
                                         "name":"edit visit time",
-                                        "function":[pro1_operator.login_doctor],
-                                        "action":[pro1_operator.edit_visit_time]
+                                        "function":[auth.login_doctor],
+                                        "action":[db.edit_visit_time]
                                         },
                                         {
                                         "name":"remove visit time",
-                                        "function":[pro1_operator.login_doctor],
-                                        "action":[pro1_operator.remove_visit_time]
+                                        "function":[auth.login_doctor],
+                                        "action":[db.remove_visit_time]
                                         },
 
                             ]
@@ -55,32 +58,32 @@ enter=[{
                             "name":"patient",
                             
                             "children":[{
-                                    "function":[pro1_operator.login_patient],
+                                    "function":[auth.login_patient],
                                     "name":"get visit time",
-                                    "action":[pro1_operator.get_visit_time,pro1_operator.create_medical_record]
+                                    "action":[models.get_visit_time, models.create_medical_record]
                                     },
 
 
 
                                 
-                                    {"function":[pro1_operator.login_patient],
+                                    {"function":[auth.login_patient],
                                     "name":"cancel visit time",
-                                    "action":[pro1_operator.cancel_visit_time]
+                                    "action":[models.cancel_visit_time]
                                     },
                                 
-                                    {"function":[pro1_operator.login_patient],
+                                    {"function":[auth.login_patient],
                                     "name":"show catched visit time",
-                                    "action":[pro1_operator.catched_visit_time]
+                                    "action":[db.catched_visit_time]
                                     },
 
-                                    {"function":[pro1_operator.login_patient],
+                                    {"function":[auth.login_patient],
                                     "name":"show bill",
-                                    "action":[pro1_operator.show_bill]
+                                    "action":[db.show_bill]
                                     },
 
-                                    {"function":[pro1_operator.login_patient],
+                                    {"function":[auth.login_patient],
                                     "name":"show visit form",
-                                    "action":[pro1_operator.show_visit_form]
+                                    "action":[db.show_visit_form]
                                     },
 
                             ]
@@ -90,44 +93,48 @@ enter=[{
                             "name":"admin",
                             "children":[
                                 {
-                                        "function":[pro1_operator.login_admin],
+                                        "function":[auth.login_admin],
                                         "name":"add new admin",
-                                    "action":[pro1_operator.add_new_admin]
+                                    "action":[models.add_new_admin]
                                     },
 
 
 
                                 
                                     {
-                                        "function":[pro1_operator.login_admin],
+                                        "function":[auth.login_admin],
                                         "name":"show patient information",
-                                    "action":[pro1_operator.show_patient_information]
+                                    "action":[db.show_patient_information]
                                     },
 
                                     {
-                                        "function":[pro1_operator.login_admin],
+                                        "function":[auth.login_admin],
                                         "name":"show doctor information",
-                                    "action":[pro1_operator.show_doctor_information]
+                                    "action":[db.show_doctor_information]
                                     },
 
-                                    {  "function":[pro1_operator.login_admin],
+                                    {  "function":[auth.login_admin],
                                         "name":"income of visit",
-                                    "action":[pro1_operator.income_visit]
+                                    "action":[db.show_income_visit]
                                     },
 
                                     {
-                                        "function":[pro1_operator.login_admin],
+                                        "function":[auth.login_admin],
                                         "name":"show number of patient's visits",
-                                    "action":[pro1_operator.number_visits]
+                                    "action":[db.show_number_visits]
                                     },
 
-                                    {   "function":[pro1_operator.login_admin],
+                                    {   "function":[auth.login_admin],
                                         "name":"income of hospital",
-                                    "action":[pro1_operator.income_hospital]
+                                    "action":[db.show_income_hospital]
                                     },
-                                    {   "function":[pro1_operator.login_admin],
+                                    {   "function":[auth.login_admin],
                                         "name":"show log ",
-                                    "action":[pro1_operator.show_log]
+                                    "action":[db.show_log_info]
+                                    },
+                                    {   "function":[auth.login_admin],
+                                        "name":"show log ",
+                                    "action":[db.show_log_error]
                                     }
 
                                                             ]

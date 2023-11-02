@@ -16,11 +16,7 @@ class Admin:
     def add_new_admin():
         pass
 
-    def log_info():
-            pass
-
-    def log_error():
-            pass
+    
 
 class Doctor:
     def __init__(self, doctor_id, experties, work_experienceit, salary, address, visit_price, users_user_id):
@@ -104,6 +100,6 @@ class Medical_Record:
         self.record_id = record_id
         self.date_of_record = date_of_visit
     
-    def create_record(cls):
+    def create_medical_record(cls):
         pass
 
