@@ -9,13 +9,13 @@ enter=[{
         "children":[
                         {
                             "name":"doctor",
-                            "action":[auth.doctor_registration],
+                            "action":[auth.Authentication.doctor_registration],
                             
 
                         },
                         {
                             "name":"patient",
-                            "action":[auth.patient_registeration],
+                            "action":[auth.Authentication.patient_registeration],
                             
                         },
                         
@@ -33,8 +33,8 @@ enter=[{
                            
                            "children":[{
                                         "name":"add visit time",
-                                        "function":[auth.login_doctor],
-                                        "action":[db.add_visit_time]
+                                        "function":[auth.Authentication.login_doctor],
+                                        "action":[db.Database.add_visit_time]
                                         },
 
 
@@ -42,13 +42,13 @@ enter=[{
                                     
                                         {
                                         "name":"edit visit time",
-                                        "function":[auth.login_doctor],
-                                        "action":[db.edit_visit_time]
+                                        "function":[auth.Authentication.login_doctor],
+                                        "action":[db.Database.edit_visit_time]
                                         },
                                         {
                                         "name":"remove visit time",
-                                        "function":[auth.login_doctor],
-                                        "action":[db.remove_visit_time]
+                                        "function":[auth.Authentication.login_doctor],
+                                        "action":[db.Database.remove_visit_time]
                                         },
 
                             ]
@@ -58,32 +58,32 @@ enter=[{
                             "name":"patient",
                             
                             "children":[{
-                                    "function":[auth.login_patient],
+                                    "function":[auth.Authentication.login_patient],
                                     "name":"get visit time",
-                                    "action":[models.get_visit_time, models.create_medical_record]
+                                    "action":[models.Visit_Date.get_visit_time, models.Medical_Record.create_medical_record]
                                     },
 
 
 
                                 
-                                    {"function":[auth.login_patient],
+                                    {"function":[auth.Authentication.login_patient],
                                     "name":"cancel visit time",
-                                    "action":[models.cancel_visit_time]
+                                    "action":[models.Visit_Date.cancel_visit_time]
                                     },
                                 
-                                    {"function":[auth.login_patient],
+                                    {"function":[auth.Authentication.login_patient],
                                     "name":"show catched visit time",
-                                    "action":[db.catched_visit_time]
+                                    "action":[db.Database.catched_visit_time]
                                     },
 
-                                    {"function":[auth.login_patient],
+                                    {"function":[auth.Authentication.login_patient],
                                     "name":"show bill",
-                                    "action":[db.show_bill]
+                                    "action":[db.Database.show_bill]
                                     },
 
-                                    {"function":[auth.login_patient],
+                                    {"function":[auth.Authentication.login_patient],
                                     "name":"show visit form",
-                                    "action":[db.show_visit_form]
+                                    "action":[db.Database.show_visit_form]
                                     },
 
                             ]
@@ -93,48 +93,48 @@ enter=[{
                             "name":"admin",
                             "children":[
                                 {
-                                        "function":[auth.login_admin],
+                                        "function":[auth.Authentication.login_admin],
                                         "name":"add new admin",
-                                    "action":[models.add_new_admin]
+                                    "action":[models.Admin.add_new_admin]
                                     },
 
 
 
                                 
                                     {
-                                        "function":[auth.login_admin],
+                                        "function":[auth.Authentication.login_admin],
                                         "name":"show patient information",
-                                    "action":[db.show_patient_information]
+                                    "action":[db.Database.show_patient_information]
                                     },
 
                                     {
-                                        "function":[auth.login_admin],
+                                        "function":[auth.Authentication.login_admin],
                                         "name":"show doctor information",
-                                    "action":[db.show_doctor_information]
+                                    "action":[db.Database.show_doctor_information]
                                     },
 
-                                    {  "function":[auth.login_admin],
+                                    {  "function":[auth.Authentication.login_admin],
                                         "name":"income of visit",
-                                    "action":[db.show_income_visit]
+                                    "action":[db.Database.show_income_visit]
                                     },
 
                                     {
-                                        "function":[auth.login_admin],
+                                        "function":[auth.Authentication.login_admin],
                                         "name":"show number of patient's visits",
-                                    "action":[db.show_number_visits]
+                                    "action":[db.Database.show_number_visits]
                                     },
 
-                                    {   "function":[auth.login_admin],
+                                    {   "function":[auth.Authentication.login_admin],
                                         "name":"income of hospital",
-                                    "action":[db.show_income_hospital]
+                                    "action":[db.Database.show_income_hospital]
                                     },
-                                    {   "function":[auth.login_admin],
+                                    {   "function":[auth.Authentication.login_admin],
                                         "name":"show log ",
-                                    "action":[db.show_log_info]
+                                    "action":[db.Database.show_log_info]
                                     },
-                                    {   "function":[auth.login_admin],
+                                    {   "function":[auth.Authentication.login_admin],
                                         "name":"show log ",
-                                    "action":[db.show_log_error]
+                                    "action":[db.Database.show_log_error]
                                     }
 
                                                             ]
