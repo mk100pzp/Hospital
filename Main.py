@@ -1,4 +1,6 @@
 from app.menu import menu
+import os
+import time
 
 class Menue:
     list_obj=[]
@@ -38,7 +40,7 @@ class Menue:
     
     @staticmethod
     def input():
-        number_choise=input("Number")
+        number_choise=input("choose a number:\n if you want to go back please enter 'b' and exit 'e'\n  "  )
         return number_choise
 
 
@@ -82,6 +84,9 @@ def display(obj):
     try:
         
             
+            
+            os.system('cls')
+
             if 'function' in obj.child_list[0]:
                 
                 if not  obj.child_list[0]['function'][0]():
@@ -109,8 +114,13 @@ def display(obj):
                     print( "end")
                 else:
                     display(obj.parent)
+            if number_choise=="e":
+                print("have good day! ")
+                exit()
+                 
             else:
                     print ("your choise is not valid\n please enter a correct number")
+                    time.sleep(2)
                     display(obj)
 
 

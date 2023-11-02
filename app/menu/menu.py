@@ -129,11 +129,11 @@ enter=[{
                                     "action":[db.Database.show_income_hospital]
                                     },
                                     {   "function":[auth.Authentication.login_admin],
-                                        "name":"show log ",
+                                        "name":"show log info ",
                                     "action":[db.Database.show_log_info]
                                     },
                                     {   "function":[auth.Authentication.login_admin],
-                                        "name":"show log ",
+                                        "name":"show log error",
                                     "action":[db.Database.show_log_error]
                                     }
 
