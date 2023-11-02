@@ -136,9 +136,3 @@ enter=[{
 ]}
 ]
 
-
-"main:
-    1-restration
-                a)doctor
-                b)patient
-    2-log in"
