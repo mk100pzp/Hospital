@@ -1,5 +1,73 @@
 import psycopg2
 import bcrypt
+from configparser import ConfigParser
+
+
+
+def config(filename="database.ini", section=None):
+    parser = ConfigParser()
+    parser.read(filename)
+    if parser.has_section(section):
+        db_config = dict(parser.items(section))
+        params = parser.items(section)
+        # for param in params:
+        #     db_config[param[0]] = param[1]
+    else:
+        raise Exception(f'section {section} not found')
+    return db_config
+
+
+def connection_database(db_name):
+    try:
+        params = config("database.ini", section="default_inf_connect")
+        conn = psycopg2.connect(**params)
+        conn.autocommit = True
+        cursor = conn.cursor()
+        query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
+        # '''select exists (select 1 from pg_database where  datname=%s)'''
+        # '''select exists (SELECT datname from pg_database where datname=%s)'''
+        cursor.execute(query_exist_database, (db_name,))
+        # (query_exist_database,db_name)
+        print(":D----")
+
+        if cursor.fetchone():
+            print(":D----")
+            pass
+        else:
+
+            cursor.execute(f'CREATE DATABASE {db_name}')
+            conn.commit()
+            print(":D")
+    except(Exception, psycopg2.Error) as Error:
+        # print('you cant connect to postgres default database, check information of your default database')
+        print(Error)
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
+
+
+def connect(conn, cur, db_name):
+    if conn and cur:
+        conn, cur, local_connection = conn, cur, False
+    else:
+        try:
+            connection_database(db_name)
+            params = config("database.ini", section="inf_connect")
+            conn = psycopg2.connect(**params)
+            cur = conn.cusor()
+            local_connection = True
+        except (Exception, psycopg2.DatabaseError) as e:
+            conn, cur, local_connection = None, None, None
+        return conn, cur, local_connection
+
+
+def creat_table(conn, cursor):
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS request_logs (id SERIAL PRIMARY KEY,role_name VARCHAR(255),role_dec VARCHAR(255)")
+
+
+connection_database('sample')
 
 class Database:
 
