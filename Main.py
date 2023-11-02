@@ -1,5 +1,4 @@
-import pro1_exception
-import new_menue
+from app.menu import menu
 
 class Menue:
     list_obj=[]
