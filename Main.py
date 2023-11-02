@@ -110,10 +110,10 @@ def display(obj):
                 else:
                     display(obj.parent)
             else:
-                    pro1_exception.Exception.key_error()
+                    print ("your choise is not valid\n please enter a correct number")
                     display(obj)
 
 
 
-generate_obj(new_menue.enter)
+generate_obj(menu.enter)
 display(Menue.list_obj[0])
