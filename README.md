@@ -42,4 +42,4 @@ The structure :
 
 ## erd diagram:
 
-<p align="center"><img src="https://s6.uupload.ir/files/mysql_demo_physical_data_model-2023-10-31_19-56_q2og.png" alt="erd_diagram"> </p>
+<p align="center"><img src="https://s6.uupload.ir/files/mysql_demo_physical_data_model-2023-11-02_10-56_coji.png" alt="erd_diagram"> </p>
