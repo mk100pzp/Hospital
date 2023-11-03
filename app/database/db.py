@@ -186,3 +186,8 @@ class Database:
 
     def show_log_error():
             pass
+    
+    def serch_database_information(table_name,name)->dict:
+        pass
+#     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
+# if there is not any record with that name return empty dictionary

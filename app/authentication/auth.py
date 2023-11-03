@@ -12,16 +12,16 @@ class Authentication:
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed_password
     
-    @staticmethod
-    def doctor_registration():
+    @classmethod
+    def doctor_registration(cls):
         try:
             user_name = input("Enter your username : ")
             user_pass_1 = input("Enter your password : ")
             user_pass_2 = input("re-write your password : ")
             if user_pass_1 != user_pass_2:
                 print("Not equal password together !")
-                Authentication.doctor_registration()
-            user_pass_1 = Authentication.hash_password(user_pass_1)
+                cls.doctor_registration()
+            user_pass_1 = cls.hash_password(user_pass_1)
             user_email = input("Enter your email : ")
             user_mobile = int(input("Enter your email : "))
             doctor_name = input("Enter your name :")
@@ -35,22 +35,22 @@ class Authentication:
                 print("Your registration successfull.")
             else : 
                 print("something went wrong ! please try again.")
-                Authentication.doctor_registration()
+                cls.doctor_registration()
 
         except :
             print("Please enter number for mobile - work experienceit - salary - visit price")
-            Authentication.doctor_registration()
+            cls.doctor_registration()
 
-    @staticmethod       
-    def patient_registeration():
+    @classmethod       
+    def patient_registeration(cls):
         try:
             user_name = input("Enter your username : ")
             user_pass_1 = input("Enter your password : ")
             user_pass_2 = input("re-write your password : ")
             if user_pass_1 != user_pass_2:
                 print("Not equal password together !")
-                Authentication.patient_registeration()
-            user_pass_1 = Authentication.hash_password(user_pass_1)
+                cls.patient_registeration()
+            user_pass_1 = cls.hash_password(user_pass_1)
             user_email = input("Enter your email : ")
             user_mobile = int(input("Enter your email : "))
             patient_name = input("Enter your name : ")
@@ -60,11 +60,11 @@ class Authentication:
                 print("Your registration successfull.")
             else : 
                 print("something went wrong ! please try again.")
-                Authentication.patient_registeration()
+                cls.patient_registeration()
 
         except :
             print("Please enter number for mobile - work experienceit - salary - visit price")
-            Authentication.patient_registeration()
+            cls.patient_registeration()
 
     @staticmethod
     def login_patient():
