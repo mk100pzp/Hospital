@@ -94,13 +94,12 @@ class DbPostgresManager:
             self._close()
         except Error as err:
             print(err)
-            
 
     def creat_table(self):
         self._db_connect()
-        all_tables=DbPostgresManager.reade_file(self.tables).sections()
+        all_tables = DbPostgresManager.reade_file(self.tables).sections()
         for table in all_tables:
-            columns= DbPostgresManager.config(self.tables, section=table)
+            columns = DbPostgresManager.config(self.tables, section=table)
             query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
                 (str(value[0]) + " " + str(value[1])) for value in columns.items()))
             self.__cur.execute(query)
@@ -108,21 +107,96 @@ class DbPostgresManager:
         self._close()
         print("table create successfully")
 
+    def drop_table(self, table_name):
+        """
+              his method remove a table from a Database.
 
-        
+              parameters
+              ---------
+              table_name : str
+                 The name of the table to remove.
+        """
+        self._db_connect()
+        query = "DROP TABLE IF EXISTS %s;"""
+        self.__cur.execute(query, (table_name,))
+        print("table drop..")
+        self._close()
 
-    # def update_table(self,table_name, name_column,value :str, taget_cell:str, target_value):
-    #     self.__cur.execute(f" UPDATE {table_name} SET {taget_cell} = {target_value} WHERE {name_column}={value});")
+    def update_table(self, table_name, new_value: dict, condition: dict):
+        """
+            This method update rows of table from a Databas
+            Parameters
+            ----------
+            table_name : str
+                The name of the table to remove.
+            new_value:dict
+                The new value for update column table
+            condition:
+                The conditions for select column of table
+        """
+        try:
+            self._db_connect()
+            values = []
+            key = 0  # Static value for getting keys in items tuple
+            value = 1  # Static value for getting values in items tuple
+            for item in new_value.items():
+                if isinstance(item[value], float) or isinstance(item[value], int):
+                    values.append("%s = %s" % (item[key], item[value]))
+                else:
+                    values.append("%s = '%s'" % (item[key], item[value]))
+            query = "UPDATE %s SET %S "
+            if condition:
+                query += "where %s" % condition
+            else:
+                query += ";"
+            self.__cur.execute(query, (table_name, values))
+            print("data update in tables")
+            self._close()
+        except Error as err:
+            print(err)
 
-    # def insert_row(self,table_name : str ,columns_name:tuple,values : tuple):
-    #     self.__cur.execute(f"INSERT INTO {table_name} {columns_name} VALUES({values};")
-    #     #RETURNING output_expression AS output_name;
 
-    # def delete_row(self,table_name : str,column_name : str,value: None):
-    #     self.__cur.execute(f"DELETE FROM {table_name} WHERE {column_name}={value} RETURNING (select_list | *)")
+    def delete_from_table(self, table_name: str, condition: dict):
+        self._db_connect()
+        query = f"DELETE FROM %S RETURNING (select_list | *)"
+        if condition:
+            query += "WHERE %S;"
+        else:
+            query += ";"
+        self.__cur.execute(query, (table_name, condition))
+        self._close()
 
-    # def select_row(self,table_name: str,column_name: str, values : None ,order_base_row: str,columns_show = "*"):
-    #     self.__cur.execute(f"SELECT {columns_show} FROM {table_name} WHERE {column_name}={values} ORDER BY {order_base_row};")
+    def select(self):
+        pass
+
+    def insert(self, table_name, col_name: list, col_value: list):
+        """
+            This method will insert in the given table by:
+            ----------
+            table : str
+                The table we will insert the values into.
+            col_name: list
+                list of column table
+            col_value : list
+                List of values to add.
+        """
+        try:
+            self._db_connect()
+            columns = [f'"{x}"' for x in col_name]
+            for value in col_value:
+                if isinstance(value, float) or isinstance(value, int):
+                    col_value.append("%s" % value)
+                else:
+                    col_value.append("'%s'" % value)
+            query = (f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({'%s,' * (len(columns) - 1) + '%s'} "
+                     f"RETURNING * AS data_tabe)")
+            self.__cur.execute(query, (table_name, values))
+            print("data insert to table")
+            self._close()
+        except Error as err:
+            print(err)
+
+
     
     # @staticmethod
     # def check_password(hashed_password, input_password):
@@ -216,6 +290,7 @@ class DbPostgresManager:
 first_db=DbPostgresManager()
 
 first_db.creat_table()
+first_db.update_table("users", new_value: dict, condition: dict)
 
 
 
