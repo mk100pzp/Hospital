@@ -97,11 +97,14 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def creat_table(self, tables_name):
-
-        for table in tables_name:
+    def creat_table(self):
+        params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
+        for table_name in self.dbps_defult:
             self._db_connect()
-            self.__cur.execute(F"CREATE TABLE *{tables_name}*();")
+            self.__cur.execute(F"CREATE TABLE *{table_name}*();")
+            params = DbPostgresManager.config(self.dbps_defult, section=table_name)
+            self. create_columns(table_name, params)
+
 
     def create_columns(self, table_name, columns: dict):
         for column_name, value in self.columns.items():
@@ -111,56 +114,28 @@ class DbPostgresManager:
                 self.intro_key(table_name, column_name)
         self._close()
 
-    def intro_key(self, table_name, new_column_name):
-        if new_column_name[1] == "primary":
-            self.__cur.execute(f"alter table {table_name} add primary key {new_column_name[0]};")
+    def intro_key(self, table_name, column_name, values):
+        if values[1] == "primary":
+            self.__cur.execute(f"alter table {table_name} add primary key {column_name};")
         else:
             self.__cur.execute(
-                f"alter table {table_name} add foreign key (employee_number) EFERENCES {new_column_name[2]} {new_column_name[0]}")
+                f"alter table {table_name} add foreign key {column_name} EFERENCES {values[2]} {values[3]}")
         self._close()
 
-    connection_database()
 
+    def update_table(self,table_name,id :str, taget_cell:str):
+        self.__cur.execute(f" UPDATE {table_name} SET taget_cell = {taget_cell} WHERE id ={id});")
 
-class Database:
+    def insert_row(self,table_name : str ,columns_name:tuple,values : tuple):
+        self.__cur.execute(f"INSERT INTO {table_name} {columns_name} VALUES({values};")
+        #RETURNING output_expression AS output_name;
 
-    def __init__(self, dbname, user, password, host, port):
+    def delete_row(self,table_name : str,column_name : str,value: None):
+        self.__cur.execute(f"DELETE FROM {table_name} WHERE {column_name}={value} RETURNING (select_list | *")
 
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
-
-        self.connection = None
-        self.cursor = None
-
-
-    def connect(self):
-
-        try:
-            self.connection = psycopg2.connect(
-                dbname=self.dbname,
-                user=self.user,
-                password=self.password,
-                host=self.host,
-                port=self.port
-            )
-
-            self.cursor = self.connection.cursor()
-
-        except psycopg2.Error as e:
-            print(f"Error : {e}")
-
-
-
-
-
-    def close_connection(self):
-        if self.connection:
-            self.cursor.close()
-            self.connection.close()
-
+    def select_row(self,table_name: str,column_name: str, values : None ,order_base_row: str,columns_show = "*"):
+        self.__cur.execute(f"SELECT {columns_show} FROM {table_name} WHERE {column_name}={values} ORDER BY {order_base_row};")
+    
     @staticmethod
     def check_password(hashed_password, input_password):
             return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
@@ -173,7 +148,6 @@ class Database:
            pass
     
     #=================================================================================================
-    
     def save_doctor(obj):
             pass
     def save_admin():
@@ -244,3 +218,4 @@ class Database:
         pass
 #     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
 # if there is not any record with that name return empty dictionary
+    
