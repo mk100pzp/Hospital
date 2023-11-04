@@ -143,13 +143,14 @@ class DbPostgresManager:
 #     def save_patient(obj):
 #             pass
     
-#     def save_visit_time(obj):
+#     def save_visit_time(visit_id,user,password):
+# find id_patient with username and password then save it in patient_id clumn in visit_date whith visit_id associated with it
+# if it ia successfull return true else return false
 #             pass
 #     def remove_database_visit_time(obj):
 #             pass
-#     def get_database_visit_time(obj):
-#             pass
-    # def cancel_database_visit_time(obj):
+
+    # def cancel_visit_time(visit_id):
     #         # set null in patient id clumn of visit time table
     #         pass
 #     def catched_visit_time():
@@ -174,7 +175,8 @@ class DbPostgresManager:
 #     def show_income_hospital():
             
 #             pass
-#     def show_visit_form(obj):
+#     def search_visit_form(username, password):
+#  show last visit form for username and password of patient
 #             pass
 #     def save_medical_record(obj):
 #            pass
@@ -182,14 +184,12 @@ class DbPostgresManager:
 #            pass
 #     # ......
     
-#     def add_visit_time():
+#     def add_visit_time()->bool:
 #             pass
 
-#     def edit_visit_time():
-#             # first catch the exist time then edit it and delete old time so create edited time by call save_visit_time function
-#             pass
 
-#     def remove_visit_time():
+
+#     def remove_visit_time(id_visit_time)->bool:
 #             pass
 #     def save_medical_record(obj):
 #            pass
@@ -201,12 +201,18 @@ class DbPostgresManager:
 
 #     def show_log_error():
 #             pass
-    
+    # def search_empty_time():
+        # search all empty time records and return them with all information such as name of doctor ,time and.. in a dictionary like
+        # {"1":{"doctor name":...,"visit_id":...,"time":...},"2":{"doctor name":...,"time":...}}
+
 #     def serch_database_information(table_name,name)->dict:
 #         pass
 # #     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
 # # if there is not any record with that name return empty dictionary
+# def calculate_visit_incom_doctor(user_name,password):
+#     # find doctor then find and sum of cost of all visit for that doctor and return amount of that
 
+#     pass
 first_db=DbPostgresManager()
 
 first_db.creat_table()

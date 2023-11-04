@@ -21,6 +21,7 @@ class Admin(User):
         admin_obj=cls(user_name,user_pass,user_email,user_mobile)
         Database.save_admin(admin_obj)
 
+# this class add search ability to doctor and patient class
 class Mixinsearch:
     def get_information()->dict:
         name=input("please  name : ")
@@ -61,8 +62,12 @@ class Doctor(User,Mixinsearch):
         
            
     def search_income_visit():
-        # get information to find visit and create object from that ,call show_visit_information from database module
-        pass
+        # calculate all income of a doctor 
+        user_name=input("please enter a user name: ")
+        user_pass=input("please enter a password: ")
+        incom=Database.calculate_visit_incom_doctor(user_name,user_pass)
+        print(f"the incom of that doctor is {incom}")
+        
 
 
 
@@ -71,10 +76,44 @@ class Paient(User,Mixinsearch):
         User.__init__(self,user_name, user_pass_1, user_email, user_mobile)
         self.patient_name = patient_name
         self.patient_address = patient_address
+
+    def show_visit_form():
+        # get information to create visit and create object from that ,call show_visit_form from database module
+        username=input("please enter your username:  ")
+        password=input("please enter your password: ")
+        dict_information=Database.search_visit_form(username, password)
+        print(dict_information)
+    @classmethod
+    def get_visit_time(cls):
+        try:
+            dict_time=Database.search_empty_time()
+            for num, time in dict_time.items():
+                print(num, ":", time)
+            choise_num=input("Please enter a number to get :  ")
+        
+            dict_choise_time=dict_time[choise_num]
+            visit_id=dict_choise_time["visit_id"]
+            user_name=input("Please enter your user name: ")
+            password=input("Please enter your password: ")
+            if Database.save_visit_time(visit_id,user_name,password):
+                print("your visit time is saved")
+            else:
+                ("sorry please try again later")
+        except KeyError:
+            print("please enter right number! ")
+            cls.get_information()
+
+
+    def cancel_visit_time():
+        id_visit=input("Please enter id of your visit time")
+        if Database.cancel_visit_time(id_visit):
+            print("your visit time cancelled! ")
+        else:
+            print("please try again later")
         
     @classmethod
     def search_patient_information(cls):
-        # creat patient objmhjgjhect with input information then call show_patient_information from database module
+        # creat patient obj with input information then call show_patient_information from database module
         dict_information=cls.get_information()
         try:
             print(f"""
@@ -100,25 +139,41 @@ class Visit_Form:
         self.duration_of_hospitalization = duration_of_hospitalization
         
 
-    def search_visit_form():
-        # get information to find visit and create object from that ,call show_visit_form from database module
-        pass
+    
 
-    def create_record(cls):
-        # input information
-        pass
-
+    
 
     
 class Visit_Date:
-    def __init__(self, visit_date_time):
+    def __init__(self,doctor_id, visit_date_time,patient_id="Null"):
+        self.doctor_id = doctor_id
         self.visit_date_time = visit_date_time
-        
-    def get_visit_time():
-        pass
+        self.patient_id = patient_id
 
-    def cancel_visit_time():
-        pass
+    @staticmethod
+    def create_visit_date():
+        doctor_id=input("please enter yor id: ")
+        visit_date=input("please enter visit date like '07/01/2019 07:00:00': ")
+        obj=Visit_Date(doctor_id, visit_date)
+        if Database.add_visit_time(obj):
+            print("Adding visit time successfully")
+        else:
+            print("please try again!")
+    
+    @staticmethod
+    def remove_visit_time():
+        id_visit_time=input("please enter id_visit_time: ")
+        if Database.remove_visit_time(id_visit_time):
+            print("Adding visit time successfully")
+        else:
+            print("please try again!")
+
+
+        
+
+
+        
+    
 
 
 class Paient_Bill:
@@ -130,14 +185,12 @@ class Paient_Bill:
         self.paient_share = paient_share
         self.insurance_contribution = insurance_contribution
 
-    def create_patient_bill():
-        pass
-
+    
+    
+    
 
 class Medical_Record:
     def __init__(self):
         pass
 
-    def create_medical_record(cls):
-        pass
-
+    

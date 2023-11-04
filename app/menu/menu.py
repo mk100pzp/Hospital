@@ -34,21 +34,17 @@ enter=[{
                            "children":[{
                                         "name":"add visit time",
                                         "function":[auth.Authentication.login_doctor],
-                                        "action":[db.Database.add_visit_time]
+                                        "action":[models.Visit_Date.create_visit_date]
                                         },
 
 
 
                                     
-                                        {
-                                        "name":"edit visit time",
-                                        "function":[auth.Authentication.login_doctor],
-                                        "action":[db.Database.edit_visit_time]
-                                        },
+                                        
                                         {
                                         "name":"remove visit time",
                                         "function":[auth.Authentication.login_doctor],
-                                        "action":[db.Database.remove_visit_time]
+                                        "action":[models.Visit_Date.remove_visit_time]
                                         },
 
                             ]
@@ -60,7 +56,7 @@ enter=[{
                             "children":[{
                                     "function":[auth.Authentication.login_patient],
                                     "name":"get visit time",
-                                    "action":[models.Visit_Date.get_visit_time, models.Medical_Record.create_medical_record]
+                                    "action":[models.Paient.get_visit_time]
                                     },
 
 
@@ -68,7 +64,7 @@ enter=[{
                                 
                                     {"function":[auth.Authentication.login_patient],
                                     "name":"cancel visit time",
-                                    "action":[models.Visit_Date.cancel_visit_time]
+                                    "action":[models.Paient.cancel_visit_time]
                                     },
                                 
                                     {"function":[auth.Authentication.login_patient],
@@ -83,7 +79,7 @@ enter=[{
 
                                     {"function":[auth.Authentication.login_patient],
                                     "name":"show visit form",
-                                    "action":[db.Database.show_visit_form]
+                                    "action":[models.Paient.show_visit_form]
                                     },
 
                             ]
@@ -115,7 +111,7 @@ enter=[{
 
                                     {  "function":[auth.Authentication.login_admin],
                                         "name":"income of visit",
-                                    "action":[db.Database.show_income_visit]
+                                    "action":[models.Doctor.search_income_visit]
                                     },
 
                                     {
