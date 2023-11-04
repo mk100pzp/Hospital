@@ -5,7 +5,7 @@ import logging
 import importlib
 
 
-class DbPostgresManager:
+class Database:
     def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None,tables='hospital.ini'):
         self.dbps_defult = dbps_defult
         self.dbname = dbname
@@ -20,7 +20,7 @@ class DbPostgresManager:
         return parser
     @staticmethod
     def config(filename="database.ini", section=None):
-        parser=DbPostgresManager.reade_file(filename)
+        parser=Database.reade_file(filename)
         if parser.has_section(section):
             db_config = dict(parser.items(section))
         else:
@@ -28,7 +28,7 @@ class DbPostgresManager:
         return db_config
 
     def connection_database(self):
-        params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
+        params = Database.config(self.dbps_defult, section="default_inf_connect")
         conn = psycopg2.connect(**params)
         cur=conn.cursor()
         conn.autocommit = True
@@ -97,9 +97,9 @@ class DbPostgresManager:
 
     def creat_table(self):
         self._db_connect()
-        all_tables = DbPostgresManager.reade_file(self.tables).sections()
+        all_tables = Database.reade_file(self.tables).sections()
         for table in all_tables:
-            columns = DbPostgresManager.config(self.tables, section=table)
+            columns = Database.config(self.tables, section=table)
             query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
                 (str(value[0]) + " " + str(value[1])) for value in columns.items()))
             self.__cur.execute(query)
@@ -333,7 +333,7 @@ class DbPostgresManager:
 #     # find doctor then find and sum of cost of all visit for that doctor and return amount of that
 
 #     pass
-first_db=DbPostgresManager()
+first_db=Database()
 
 # first_db.creat_table()
 # first_db.update_table("users", new_value: dict, condition: dict)
