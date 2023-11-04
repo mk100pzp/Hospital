@@ -6,7 +6,7 @@ import importlib
 
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password='1234'):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None):
         self.dbps_defult = dbps_defult
         self.dbname = dbname
         self.password = password
@@ -28,23 +28,18 @@ class DbPostgresManager:
     def connection_database(self):
         params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
         conn = psycopg2.connect(**params)
+        cur=conn.cursor()
         conn.autocommit = True
-        with conn:
-            with conn.cursor() as cursor:
-                query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
-                cursor.execute(query_exist_database, (self.dbname,))
-                print(":D----")
-                params['dbname'], params['password'] = self.dbname, self.password
-                if cursor.fetchone():
-                    print(":D----")
-                    return params
-                else:
-                    cursor.execute(f'CREATE DATABASE {self.dbname}')
-                    params['dbname'], params['password'] = self.dbname, self.password
-                    conn.commit()
-                    print(":D")
-                return params
-
+        query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
+        cur.execute(query_exist_database, (self.dbname,))
+        if cur.fetchone():
+            params['dbname']= self.dbname
+            return params
+        else:
+            cur.execute(f'CREATE DATABASE {self.dbname}')
+            params['dbname']=self.dbname
+        return params
+        
     def _db_connect(self):
         """Establish a connection to the PostgreSQL database."""
 
@@ -52,6 +47,8 @@ class DbPostgresManager:
             params = self.connection_database()
             self.__conn = psycopg2.connect(**params)
             self.__cur = self.__conn.cursor()
+            print("connect succesfully")
+            return self.__conn,self.__cur
         except Exception as error:
             logging.error(
                 f"Error: Could not connect to the {self.dbname} database. \n{error}"
@@ -97,50 +94,37 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def creat_table(self):
-        params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
-        for table_name in self.dbps_defult:
-            self._db_connect()
-            self.__cur.execute(F"CREATE TABLE *{table_name}*();")
-            params = DbPostgresManager.config(self.dbps_defult, section=table_name)
-            self. create_columns(table_name, params)
-
-
-    def create_columns(self, table_name, columns: dict):
-        for column_name, value in self.columns.items():
-            self.__cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {value[0]};")
-            # self.__cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {new_column_name} data_type constraint;")
-            if len(value) >= 2:
-                self.intro_key(table_name, column_name)
+    def creat_table(self, tables: dict):
+        self._db_connect()
+        for table, coloumn in tables.items():
+            query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
+                (str(value[0]) + " " + str(value[1])) for value in coloumn.items()))
+            self.__cur.execute(query)
+        self.__conn.commit()
         self._close()
-
-    def intro_key(self, table_name, column_name, values):
-        if values[1] == "primary":
-            self.__cur.execute(f"alter table {table_name} add primary key {column_name};")
-        else:
-            self.__cur.execute(
-                f"alter table {table_name} add foreign key {column_name} EFERENCES {values[2]} {values[3]}")
-        self._close()
+        print("table create successfully")
 
 
-    def update_table(self,table_name,id :str, taget_cell:str):
-        self.__cur.execute(f" UPDATE {table_name} SET taget_cell = {taget_cell} WHERE id ={id});")
+        
 
-    def insert_row(self,table_name : str ,columns_name:tuple,values : tuple):
-        self.__cur.execute(f"INSERT INTO {table_name} {columns_name} VALUES({values};")
-        #RETURNING output_expression AS output_name;
+    # def update_table(self,table_name, name_column,value :str, taget_cell:str, target_value):
+    #     self.__cur.execute(f" UPDATE {table_name} SET {taget_cell} = {target_value} WHERE {name_column}={value});")
 
-    def delete_row(self,table_name : str,column_name : str,value: None):
-        self.__cur.execute(f"DELETE FROM {table_name} WHERE {column_name}={value} RETURNING (select_list | *")
+    # def insert_row(self,table_name : str ,columns_name:tuple,values : tuple):
+    #     self.__cur.execute(f"INSERT INTO {table_name} {columns_name} VALUES({values};")
+    #     #RETURNING output_expression AS output_name;
 
-    def select_row(self,table_name: str,column_name: str, values : None ,order_base_row: str,columns_show = "*"):
-        self.__cur.execute(f"SELECT {columns_show} FROM {table_name} WHERE {column_name}={values} ORDER BY {order_base_row};")
+    # def delete_row(self,table_name : str,column_name : str,value: None):
+    #     self.__cur.execute(f"DELETE FROM {table_name} WHERE {column_name}={value} RETURNING (select_list | *)")
+
+    # def select_row(self,table_name: str,column_name: str, values : None ,order_base_row: str,columns_show = "*"):
+    #     self.__cur.execute(f"SELECT {columns_show} FROM {table_name} WHERE {column_name}={values} ORDER BY {order_base_row};")
     
-    @staticmethod
-    def check_password(hashed_password, input_password):
-            return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
+    # @staticmethod
+    # def check_password(hashed_password, input_password):
+    #         return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
     
-    #=================================================================================================
+#     #=================================================================================================
 
     # اسم کاربری و پسورد رو با ورودی مقایسه کند و اگر چنین دکتری وجود داشت ترو را برگداند
     #برای مقایسه از تابع چک پسورد استفاده کند
@@ -148,74 +132,130 @@ class DbPostgresManager:
            pass
     
     #=================================================================================================
-    def save_doctor(obj):
-            pass
-    def save_admin():
-            pass
-    def save_patient(obj):
-            pass
+#     def save_doctor(obj):
+#             pass
+#     def save_admin():
+#             pass
+#     def save_patient(obj):
+#             pass
     
-    def save_visit_time(obj):
-            pass
-    def remove_database_visit_time(obj):
-            pass
-    def get_database_visit_time(obj):
-            pass
-    def cancel_database_visit_time(obj):
-            # set null in patient id clumn of visit time table
-            pass
-    def catched_visit_time():
-            # show all visit time for id_patient
+#     def save_visit_time(obj):
+#             pass
+#     def remove_database_visit_time(obj):
+#             pass
+#     def get_database_visit_time(obj):
+#             pass
+    # def cancel_database_visit_time(obj):
+    #         # set null in patient id clumn of visit time table
+    #         pass
+#     def catched_visit_time():
+#             # show all visit time for id_patient
 
-            pass
-    def save_patient_bill():
-            pass
-    def show_bill():
-            pass
-    def show_patient_information(obj):
-            pass
+#             pass
+#     def save_patient_bill():
+#             pass
+#     def show_bill():
+#             pass
+#     def show_patient_information(obj):
+#             pass
 
-    def show_doctor_information(obj):
-            pass
-    def show_income_visit(obj):
-            # search for information of object income
-            pass
-    def show_number_visits():
-            # get information for find visits and show them from database
-            pass
-    def show_income_hospital():
+#     def show_doctor_information(obj):
+#             pass
+#     def show_income_visit(obj):
+#             # search for information of object income
+#             pass
+#     def show_number_visits():
+#             # get information for find visits and show them from database
+#             pass
+#     def show_income_hospital():
             
-            pass
-    def show_visit_form(obj):
-            pass
-    def save_medical_record(obj):
-           pass
-    def save_visit_form(obj):
-           pass
-    # ......
+#             pass
+#     def show_visit_form(obj):
+#             pass
+#     def save_medical_record(obj):
+#            pass
+#     def save_visit_form(obj):
+#            pass
+#     # ......
     
-    def add_visit_time():
-            pass
+#     def add_visit_time():
+#             pass
 
-    def edit_visit_time():
-            # first catch the exist time then edit it and delete old time so create edited time by call save_visit_time function
-            pass
+#     def edit_visit_time():
+#             # first catch the exist time then edit it and delete old time so create edited time by call save_visit_time function
+#             pass
 
-    def remove_visit_time():
-            pass
-    def save_medical_record(obj):
-           pass
+#     def remove_visit_time():
+#             pass
+#     def save_medical_record(obj):
+#            pass
     
-    # ......
+#     # ......
     
-    def show_log_info():
-            pass
+#     def show_log_info():
+#             pass
 
-    def show_log_error():
-            pass
+#     def show_log_error():
+#             pass
     
-    def serch_database_information(table_name,name)->dict:
-        pass
-#     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
-# if there is not any record with that name return empty dictionary
-    
+#     def serch_database_information(table_name,name)->dict:
+#         pass
+# #     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
+# # if there is not any record with that name return empty dictionary
+
+first_db=DbPostgresManager()
+ 
+table={
+      "users": {"user_id":"serial primary key",
+                "user_name":"varchar(100)",
+                "user_pass":"varchar(255)",
+                "user_email":"varchar(255)",
+                "user_mobil":"int"       
+      },
+      "patients":{"patient_id":"serial primary key",
+                "patient_name":"varchar (100)",
+                "patient_adress":"text",
+                "users_user_id":"int references users(user_id)"
+      },
+      "doctors":{"doctor_id":"serial primary key",
+                "expertis":"varchar (50)",
+                "work_experience":"int",
+                "adress": "text",
+                "visit_price":"decimal(10,3)",
+                "users_user_id":"int references users(user_id)"      
+      },
+     "admin":{"admin_id": "serial primary key",
+             "users_user_id": "int references users(user_id)" 
+      },
+      "visit_dates":{"visit_id":"serial primary key",
+                   "visit_time": "timestamp",
+                   "doctors_doctor_id": "int references doctors (doctor_id)",
+                   "patients_patient_id": "int references patients (patient_id)"    
+      },
+            "medical_records":{"record_id":"serial primary key",
+                         "record_date":"timestamp"
+      },
+      "visit_forms":{"from_id": "serial primary key",
+                     "from_name": "varchar (50)",
+                     "visit_desc": "text",
+                     "hospitalization": "bool",
+                     "duration_of_hospitalization": "int",
+                     "medical_records_record_id":"int references medical_records (record_id)",
+                     "visit_dates_visit_id": "int references visit_dates (visit_id)"   
+      },
+      "patient_bills":{"bill_id":"serial primary key",
+                       "date" : "timestamp",
+                       "patient_share": "decimal(10,3)",
+                       "mount_paid": "decimal(10,3)",
+                       "the_remaining_amount": "decimal(10,3)",
+                       "insurance_contribution": "decimal(10,3)" 
+
+      }
+}
+
+first_db.creat_table(table)
+
+
+
+
+
