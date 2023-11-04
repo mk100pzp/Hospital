@@ -155,8 +155,6 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def alter_table(self, ):
-        pass
 
     def delete_from_table(self, table_name: str, condition: dict):
         self._db_connect()
@@ -166,6 +164,7 @@ class DbPostgresManager:
         else:
             query += ";"
         self.__cur.execute(query, (table_name, condition))
+        self._close()
 
     def select(self):
         pass
@@ -198,20 +197,6 @@ class DbPostgresManager:
             print(err)
 
 
-        
-
-    # def update_table(self,table_name, name_column,value :str, taget_cell:str, target_value):
-    #     self.__cur.execute(f" UPDATE {table_name} SET {taget_cell} = {target_value} WHERE {name_column}={value});")
-
-    # def insert_row(self,table_name : str ,columns_name:tuple,values : tuple):
-    #     self.__cur.execute(f"INSERT INTO {table_name} {columns_name} VALUES({values};")
-    #     #RETURNING output_expression AS output_name;
-
-    # def delete_row(self,table_name : str,column_name : str,value: None):
-    #     self.__cur.execute(f"DELETE FROM {table_name} WHERE {column_name}={value} RETURNING (select_list | *)")
-
-    # def select_row(self,table_name: str,column_name: str, values : None ,order_base_row: str,columns_show = "*"):
-    #     self.__cur.execute(f"SELECT {columns_show} FROM {table_name} WHERE {column_name}={values} ORDER BY {order_base_row};")
     
     # @staticmethod
     # def check_password(hashed_password, input_password):
@@ -299,6 +284,7 @@ class DbPostgresManager:
 first_db=DbPostgresManager()
 
 first_db.creat_table()
+first_db.update_table("users", new_value: dict, condition: dict)
 
 
 
