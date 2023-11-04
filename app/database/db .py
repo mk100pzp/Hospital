@@ -289,8 +289,8 @@ class DbPostgresManager:
 #     pass
 first_db=DbPostgresManager()
 
-first_db.creat_table()
-first_db.update_table("users", new_value: dict, condition: dict)
+# first_db.creat_table()
+# first_db.update_table("users", new_value: dict, condition: dict)
 
 
 
