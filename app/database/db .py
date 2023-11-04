@@ -196,6 +196,52 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
+            def select(self, table_name: str, limit=None, select_options=None,
+                       filter_options=None, order_options=None, group_options=None):
+                """
+                    Read data from a table in the database can choose to read only some
+                    specific fields
+                    Parameters
+                    ----------
+                        table_name   :  Table to read from
+                        select_options:  string with fields that will be retrieved
+
+                        filter_options:  string with filtering options for the SQL query
+
+                        order_options:   string with field that will be used for sorting the
+                                        results of the query
+
+                        limit:          The maximum number of records to retrieve
+
+               """
+                try:
+                    self._db_connect()
+                    query = "SELECT"
+                    if select_options:
+                        query = query + select_options
+                    else:
+                        query = query + "*"
+
+                    query = query + "FROM" + table_name + " "
+
+                    if filter_options:
+                        query = query + "WHERE" + filter_options
+
+                    if order_options:
+                        query = query + "ORDER BY" + order_options
+                    if group_options:
+                        query = query + "GROUP BY" + group_options
+
+                    if limit:
+                        query = query + "LIMIT" + str(limit)
+
+                    # This is to update the connection to changes by other
+                    # processes.
+                    self.__cur.execute(query)
+                    self._close()
+                except Error as err:
+                    print(err)
+
 
     
     # @staticmethod
