@@ -141,9 +141,6 @@ class Visit_Form:
         
 
     
-
-    
-
     
 class Visit_Date:
     def __init__(self,username,password, visit_date_time,patient_id="Null"):
@@ -172,11 +169,6 @@ class Visit_Date:
             print("please try again!")
 
 
-        
-
-
-        
-    
 
 
 class Paient_Bill:
@@ -192,8 +184,13 @@ class Paient_Bill:
     
     
 
-class Medical_Record:
-    def __init__(self):
+class Medical_Record(Paient):
+    def __init__(self, patient_name,record_id, record_date):
+        Paient.__init__(self,patient_name)
+        self.record_id = record_id
+        self.record_date = record_date
+
+    def display():
         pass
 
     
