@@ -6,21 +6,25 @@ import importlib
 
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None,tables='hospital.ini'):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None, tables='hospital.ini'):
+        self.data = None
         self.dbps_defult = dbps_defult
         self.dbname = dbname
         self.password = password
-        self.tables=tables
+        self.tables = tables
         self.__conn = None
         self.__cur = None
+
     @staticmethod
     def reade_file(filename):
+        """Read  file content about database's details"""
         parser = ConfigParser()
         parser.read(filename)
         return parser
+
     @staticmethod
     def config(filename="database.ini", section=None):
-        parser=DbPostgresManager.reade_file(filename)
+        parser = DbPostgresManager.reade_file(filename)
         if parser.has_section(section):
             db_config = dict(parser.items(section))
         else:
@@ -28,28 +32,29 @@ class DbPostgresManager:
         return db_config
 
     def connection_database(self):
-        params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
+        """Establish a connection to the PostgreSQL database to Create database for hospital project """
+        params = self.config(self.dbps_defult, section="default_inf_connect")
         conn = psycopg2.connect(**params)
-        cur=conn.cursor()
+        cur = conn.cursor()
         conn.autocommit = True
         query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
         cur.execute(query_exist_database, (self.dbname,))
         if cur.fetchone():
-            params['dbname']= self.dbname
+            params['dbname'] = self.dbname
             return params
         else:
             cur.execute(f'CREATE DATABASE {self.dbname}')
-            params['dbname']=self.dbname
+            params['dbname'] = self.dbname
         return params
-        
+
     def _db_connect(self):
-        """Establish a connection to the PostgreSQL database."""
+        """Establish a connection to hospital database."""
 
         try:
             params = self.connection_database()
             self.__conn = psycopg2.connect(**params)
             self.__cur = self.__conn.cursor()
-            return self.__conn,self.__cur
+            return self.__conn, self.__cur
         except Exception as error:
             logging.error(
                 f"Error: Could not connect to the {self.dbname} database. \n{error}"
@@ -117,12 +122,12 @@ class DbPostgresManager:
                  The name of the table to remove.
         """
         self._db_connect()
-        query = "DROP TABLE IF EXISTS %s;"""
-        self.__cur.execute(query, (table_name,))
+        query = f"DROP TABLE IF EXISTS {table_name} CASCADE;"
+        self.__cur.execute(query)
         print("table drop..")
         self._close()
 
-    def update_table(self, table_name, new_value: dict, condition: dict):
+    def update_table(self, table_name, new_value: dict, condition: list):
         """
             This method update rows of table from a Databas
             Parameters
@@ -141,35 +146,39 @@ class DbPostgresManager:
             value = 1  # Static value for getting values in items tuple
             for item in new_value.items():
                 if isinstance(item[value], float) or isinstance(item[value], int):
-                    values.append("%s = %s" % (item[key], item[value]))
+                    values.append(f"{item[key]} = {item[value]}")
                 else:
-                    values.append("%s = '%s'" % (item[key], item[value]))
-            query = "UPDATE %s SET %S "
+                    values.append(f"{item[key]} = {item[value]}")
+            query = f"UPDATE {table_name} SET {','.join(values)} "
             if condition:
-                query += "where %s" % condition
+                if len(condition) > 1:
+                    query += f"WHERE {' AND '.join([f'{column} {operator} {value}' for column, operator, value in condition])}"
+                else:
+                    column, operator, value = condition[0]
+                    query += f"WHERE {column} {operator} {value}"
             else:
                 query += ";"
-            self.__cur.execute(query, (table_name, values))
+            self.__cur.execute(query)
             print("data update in tables")
             self._close()
         except Error as err:
             print(err)
 
+    def alter_table(self, ):
+        pass
 
     def delete_from_table(self, table_name: str, condition: dict):
         self._db_connect()
-        query = f"DELETE FROM %S RETURNING (select_list | *)"
+        query = f"DELETE FROM {table_name} "
+        # query = f"DELETE FROM {table_name} RETURNING (select_list | *)"
         if condition:
-            query += "WHERE %S;"
+            query += f"WHERE {condition};"
         else:
             query += ";"
-        self.__cur.execute(query, (table_name, condition))
+        self.__cur.execute(query)
         self._close()
 
-    def select(self):
-        pass
-
-    def insert(self, table_name, col_name: list, col_value: list):
+    def insert_table(self, table_name: str, col_name: list, col_value: list):
         """
             This method will insert in the given table by:
             ----------
@@ -183,96 +192,148 @@ class DbPostgresManager:
         try:
             self._db_connect()
             columns = [f'"{x}"' for x in col_name]
+            new_col_value = []
             for value in col_value:
                 if isinstance(value, float) or isinstance(value, int):
-                    col_value.append("%s" % value)
+                    new_col_value.append("%s" % value)
                 else:
-                    col_value.append("'%s'" % value)
-            query = (f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({'%s,' * (len(columns) - 1) + '%s'} "
-                     f"RETURNING * AS data_tabe)")
-            self.__cur.execute(query, (table_name, values))
+                    new_col_value.append("'%s'" % value)
+            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)})"
+            self.__cur.execute(query)
             print("data insert to table")
             self._close()
         except Error as err:
             print(err)
 
-            def select(self, table_name: str, limit=None, select_options=None,
-                       filter_options=None, order_options=None, group_options=None):
-                """
-                    Read data from a table in the database can choose to read only some
-                    specific fields
-                    Parameters
-                    ----------
-                        table_name   :  Table to read from
-                        select_options:  string with fields that will be retrieved
+    def select(self, table_name: list, limit=None, select_options: list = None,
+               filter_options: list = None, order_options: list = None, group_options: list = None,
+               logical_operator: str = None):
+        """
+            Read data from a table in the database can choose to read only some
+            specific fields
+            Parameters
+            ----------
+                table_name   :  Table to read from
+                select_options:  list with fields that will be retrieved
 
-                        filter_options:  string with filtering options for the SQL query
+                filter_options:  list with filtering options for the SQL query
 
-                        order_options:   string with field that will be used for sorting the
-                                        results of the query
+                order_options:   list with field that will be used for sorting the
+                                results of the query
+                group_options:   list with field that will be used for group the column of table
 
-                        limit:          The maximum number of records to retrieve
+                limit:          The maximum number of records to retrieve
 
-               """
-                try:
-                    self._db_connect()
-                    query = "SELECT"
-                    if select_options:
-                        query = query + select_options
-                    else:
-                        query = query + "*"
+       """
+        try:
+            self._db_connect()
+            query = "SELECT "
+            if select_options:
+                query = query + ",".join(select_options)
+            else:
+                query = query + "*"
 
-                    query = query + "FROM" + table_name + " "
+            query = query + " FROM " + ",".join(table_name) + " "
 
-                    if filter_options:
-                        query = query + "WHERE" + filter_options
+            if filter_options:
+                # column, operator, value = zip(*filter_options)
+                if len(filter_options) > 1:
+                    query += f"WHERE {' AND '.join([f'{column} {operator} {value}' for column, operator, value in filter_options])}"
 
-                    if order_options:
-                        query = query + "ORDER BY" + order_options
-                    if group_options:
-                        query = query + "GROUP BY" + group_options
+                else:
+                    column, operator, value = filter_options[0]
+                    query += f"WHERE {column} {operator} {value}"
+            else:
+                query += ";"
+                query = query + "WHERE " + ",".join(filter_options)
 
-                    if limit:
-                        query = query + "LIMIT" + str(limit)
+            if order_options:
+                query = query + "ORDER BY " + ",".join(order_options)
+            if group_options:
+                query = query + "GROUP BY " + ",".join(group_options)
+            if limit:
+                query = query + "LIMIT " + limit
 
-                    # This is to update the connection to changes by other
-                    # processes.
-                    self.__cur.execute(query)
-                    self._close()
-                except Error as err:
-                    print(err)
+            self.__cur.execute(query)
+            self.data = self.__cur.fetchall()
+            print(self.data)
+            # self.show()
+
+            self._close()
+
+        except Error as err:
+            print(err)
+
+    def show_table(self, table_name, size: int, selected_columns=None):
+        """
+        Display the contents of a table.
+
+        Parameters
+        ----------
+        table_name : str
+            The name of the table to display.
+        selected_columns : list, optional
+            A list of column names to display. If None, all columns will be shown.
+        """
+        try:
+            self._db_connect()
+            if selected_columns:
+                # Construct a comma-separated string of selected column names
+                columns_str = ', '.join(selected_columns)
+                query = f"SELECT {columns_str} FROM {table_name};"
+            else:
+                query = f"SELECT * FROM {table_name};"
+
+            self.__cur.execute(query)
+            columns = [desc[0] for desc in self.__cur.description]
+            results = self.__cur.fetchmany(size)
+
+            print(f"Table: {table_name}")
+            if len(results) > 0:
+                if selected_columns:
+                    # Print only the selected columns
+                    print(', '.join(selected_columns))
+                else:
+                    # Print all columns
+                    print(', '.join(columns))
+
+                for row in results:
+                    # Print each row's values
+                    print(', '.join(str(value) for value in row))
+            else:
+                print("The table is empty.")
+
+            self._close()
+        except Error as err:
+            print(err)
 
 
-    
-    # @staticmethod
-    # def check_password(hashed_password, input_password):
-    #         return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
-    
 #     #=================================================================================================
 
-    # اسم کاربری و پسورد رو با ورودی مقایسه کند و اگر چنین دکتری وجود داشت ترو را برگداند
-    #برای مقایسه از تابع چک پسورد استفاده کند
-    def check_exist(table_name, username, password):
-           pass
-    
-    #=================================================================================================
+# اسم کاربری و پسورد رو با ورودی مقایسه کند و اگر چنین دکتری وجود داشت ترو را برگداند
+# برای مقایسه از تابع چک پسورد استفاده کند
+# def check_exist(table_name, username, password):
+#        pass
+# @staticmethod
+# def check_password(hashed_password, input_password):
+#         return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
+# =================================================================================================
 #     def save_doctor(obj):
 #             pass
 #     def save_admin():
 #             pass
 #     def save_patient(obj):
 #             pass
-    
-#     def save_visit_time(visit_id,user,password):
-# find id_patient with username and password then save it in patient_id clumn in visit_date whith visit_id associated with it
-# if it ia successfull return true else return false
+
+#     def save_visit_time(obj):
 #             pass
 #     def remove_database_visit_time(obj):
 #             pass
-
-    # def cancel_visit_time(visit_id):
-    #         # set null in patient id clumn of visit time table
-    #         pass
+#     def get_database_visit_time(obj):
+#             pass
+# def cancel_database_visit_time(obj):
+#         # set null in patient id clumn of visit time table
+#         pass
 #     def catched_visit_time():
 #             # show all visit time for id_patient
 
@@ -293,52 +354,50 @@ class DbPostgresManager:
 #             # get information for find visits and show them from database
 #             pass
 #     def show_income_hospital():
-            
+
 #             pass
-#     def search_visit_form(username, password):
-#  show last visit form for username and password of patient
+#     def show_visit_form(obj):
 #             pass
 #     def save_medical_record(obj):
 #            pass
 #     def save_visit_form(obj):
 #            pass
 #     # ......
-    
-#     def add_visit_time()->bool:
+
+#     def add_visit_time():
 #             pass
 
+# def edit_visit_time(): # first catch the exist time then edit it and delete old time so create edited time by call
+# save_visit_time function pass
 
-
-#     def remove_visit_time(id_visit_time)->bool:
+#     def remove_visit_time():
 #             pass
 #     def save_medical_record(obj):
 #            pass
-    
+
 #     # ......
-    
+
 #     def show_log_info():
 #             pass
 
 #     def show_log_error():
 #             pass
-    # def search_empty_time():
-        # search all empty time records and return them with all information such as name of doctor ,time and.. in a dictionary like
-        # {"1":{"doctor name":...,"visit_id":...,"time":...},"2":{"doctor name":...,"time":...}}
 
-#     def serch_database_information(table_name,name)->dict:
-#         pass
-# #     it should search in tablename for a specific name in database the return dictionary if his information that their key is name of clumn and value is information
-# # if there is not any record with that name return empty dictionary
-# def calculate_visit_incom_doctor(user_name,password):
-#     # find doctor then find and sum of cost of all visit for that doctor and return amount of that
-
-#     pass
-first_db=DbPostgresManager()
-
-first_db.creat_table()
-first_db.update_table("users", new_value: dict, condition: dict)
+# def serch_database_information(table_name,name)->dict: pass #     it should search in tablename for a specific name
+# in database the return dictionary if his information that their key is name of clumn and value is information # if
+# there is not any record with that name return empty dictionary
 
 
+# Test Case
+first_db = DbPostgresManager()
 
-
+# first_db.creat_table()
+# first_db.drop_table("users")
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["shima", "1234", "shima@gmail.com", 9123664521])
+first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
+                filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
+# first_db.show_table("users", 1)
+# first_db.delete_from_table("users", "user_name='shima'")
+first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
 
