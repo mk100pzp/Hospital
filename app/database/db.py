@@ -6,17 +6,21 @@ import importlib
 
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None,tables='hospital.ini'):
         self.dbps_defult = dbps_defult
         self.dbname = dbname
         self.password = password
+        self.tables=tables
         self.__conn = None
         self.__cur = None
-
     @staticmethod
-    def config(filename="database.ini", section=None):
+    def reade_file(filename):
         parser = ConfigParser()
         parser.read(filename)
+        return parser
+    @staticmethod
+    def config(filename="database.ini", section=None):
+        parser=DbPostgresManager.reade_file(filename)
         if parser.has_section(section):
             db_config = dict(parser.items(section))
         else:
@@ -45,7 +49,6 @@ class DbPostgresManager:
             params = self.connection_database()
             self.__conn = psycopg2.connect(**params)
             self.__cur = self.__conn.cursor()
-            
             return self.__conn,self.__cur
         except Exception as error:
             logging.error(
@@ -91,12 +94,15 @@ class DbPostgresManager:
             self._close()
         except Error as err:
             print(err)
+            
 
-    def creat_table(self, tables: dict):
+    def creat_table(self):
         self._db_connect()
-        for table, coloumn in tables.items():
+        all_tables=DbPostgresManager.reade_file(self.tables).sections()
+        for table in all_tables:
+            columns= DbPostgresManager.config(self.tables, section=table)
             query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
-                (str(value[0]) + " " + str(value[1])) for value in coloumn.items()))
+                (str(value[0]) + " " + str(value[1])) for value in columns.items()))
             self.__cur.execute(query)
         self.__conn.commit()
         self._close()
@@ -202,56 +208,8 @@ class DbPostgresManager:
 # # if there is not any record with that name return empty dictionary
 
 first_db=DbPostgresManager()
- 
-table={
-      "users": {"user_id":"serial primary key",
-                "user_name":"varchar(100)",
-                "user_pass":"varchar(255)",
-                "user_email":"varchar(255)",
-                "user_mobil":"int"       
-      },
-      "patients":{"patient_id":"serial primary key",
-                "patient_name":"varchar (100)",
-                "patient_adress":"text",
-                "users_user_id":"int references users(user_id)"
-      },
-      "doctors":{"doctor_id":"serial primary key",
-                "expertis":"varchar (50)",
-                "work_experience":"int",
-                "adress": "text",
-                "visit_price":"decimal(10,3)",
-                "users_user_id":"int references users(user_id)"      
-      },
-     "admin":{"admin_id": "serial primary key",
-             "users_user_id": "int references users(user_id)" 
-      },
-      "visit_dates":{"visit_id":"serial primary key",
-                   "visit_time": "timestamp",
-                   "doctors_doctor_id": "int references doctors (doctor_id)",
-                   "patients_patient_id": "int references patients (patient_id)"    
-      },
-            "medical_records":{"record_id":"serial primary key",
-                         "record_date":"timestamp"
-      },
-      "visit_forms":{"from_id": "serial primary key",
-                     "from_name": "varchar (50)",
-                     "visit_desc": "text",
-                     "hospitalization": "bool",
-                     "duration_of_hospitalization": "int",
-                     "medical_records_record_id":"int references medical_records (record_id)",
-                     "visit_dates_visit_id": "int references visit_dates (visit_id)"   
-      },
-      "patient_bills":{"bill_id":"serial primary key",
-                       "date" : "timestamp",
-                       "patient_share": "decimal(10,3)",
-                       "mount_paid": "decimal(10,3)",
-                       "the_remaining_amount": "decimal(10,3)",
-                       "insurance_contribution": "decimal(10,3)" 
 
-      }
-}
-
-first_db.creat_table(table)
+first_db.creat_table()
 
 
 
