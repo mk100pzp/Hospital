@@ -10,8 +10,6 @@ class DbPostgresManager:
         self.dbps_defult = dbps_defult
         self.dbname = dbname
         self.password = password
-        self.table_name = None
-        self.columns = None
         self.__conn = None
         self.__cur = None
 
@@ -47,7 +45,7 @@ class DbPostgresManager:
             params = self.connection_database()
             self.__conn = psycopg2.connect(**params)
             self.__cur = self.__conn.cursor()
-            print("connect succesfully")
+            
             return self.__conn,self.__cur
         except Exception as error:
             logging.error(
