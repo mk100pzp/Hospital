@@ -1,73 +1,126 @@
-import psycopg2
-import bcrypt
 from configparser import ConfigParser
+import psycopg2
+from psycopg2 import Error
+import logging
+import importlib
 
 
+class DbPostgresManager:
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password='1234'):
+        self.dbps_defult = dbps_defult
+        self.dbname = dbname
+        self.password = password
+        self.table_name = None
+        self.columns = None
+        self.__conn = None
+        self.__cur = None
 
-def config(filename="database.ini", section=None):
-    parser = ConfigParser()
-    parser.read(filename)
-    if parser.has_section(section):
-        db_config = dict(parser.items(section))
-        params = parser.items(section)
-        # for param in params:
-        #     db_config[param[0]] = param[1]
-    else:
-        raise Exception(f'section {section} not found')
-    return db_config
+    @staticmethod
+    def config(filename="database.ini", section=None):
+        parser = ConfigParser()
+        parser.read(filename)
+        if parser.has_section(section):
+            db_config = dict(parser.items(section))
+        else:
+            raise Exception(f'section {section} not found')
+        return db_config
 
-
-def connection_database(db_name):
-    try:
-        params = config("database.ini", section="default_inf_connect")
+    def connection_database(self):
+        params = DbPostgresManager.config(self.dbps_defult, section="default_inf_connect")
         conn = psycopg2.connect(**params)
         conn.autocommit = True
-        cursor = conn.cursor()
-        query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
-        # '''select exists (select 1 from pg_database where  datname=%s)'''
-        # '''select exists (SELECT datname from pg_database where datname=%s)'''
-        cursor.execute(query_exist_database, (db_name,))
-        # (query_exist_database,db_name)
-        print(":D----")
+        with conn:
+            with conn.cursor() as cursor:
+                query_exist_database = '''(select 1 from pg_database where  datname=%s)'''
+                cursor.execute(query_exist_database, (self.dbname,))
+                print(":D----")
+                params['dbname'], params['password'] = self.dbname, self.password
+                if cursor.fetchone():
+                    print(":D----")
+                    return params
+                else:
+                    cursor.execute(f'CREATE DATABASE {self.dbname}')
+                    params['dbname'], params['password'] = self.dbname, self.password
+                    conn.commit()
+                    print(":D")
+                return params
 
-        if cursor.fetchone():
-            print(":D----")
-            pass
-        else:
+    def _db_connect(self):
+        """Establish a connection to the PostgreSQL database."""
 
-            cursor.execute(f'CREATE DATABASE {db_name}')
-            conn.commit()
-            print(":D")
-    except(Exception, psycopg2.Error) as Error:
-        # print('you cant connect to postgres default database, check information of your default database')
-        print(Error)
-    finally:
-        if conn:
-            cursor.close()
-            conn.close()
-
-
-def connect(conn, cur, db_name):
-    if conn and cur:
-        conn, cur, local_connection = conn, cur, False
-    else:
         try:
-            connection_database(db_name)
-            params = config("database.ini", section="inf_connect")
-            conn = psycopg2.connect(**params)
-            cur = conn.cusor()
-            local_connection = True
-        except (Exception, psycopg2.DatabaseError) as e:
-            conn, cur, local_connection = None, None, None
-        return conn, cur, local_connection
+            params = self.connection_database()
+            self.__conn = psycopg2.connect(**params)
+            self.__cur = self.__conn.cursor()
+        except Exception as error:
+            logging.error(
+                f"Error: Could not connect to the {self.dbname} database. \n{error}"
+            )
+            return None
 
+    def _close(self):
+        """
+            Simple method that closes the connection.
+        """
 
-def creat_table(conn, cursor):
-    cursor.execute(
-        "CREATE TABLE IF NOT EXISTS request_logs (id SERIAL PRIMARY KEY,role_name VARCHAR(255),role_dec VARCHAR(255)")
+        try:
+            self.__conn.commit()
+            self.__cur.close()
+            self.__conn.close()
 
+        except Exception:
+            print("---- Error closing database")
 
-connection_database('sample')
+        return
+
+    def drop_database(self, dbname: str):
+        """
+        Deletes a Database.
+
+        Paramaters
+        ----------
+        dbname : str
+            The name of the Database to drop.
+        """
+        try:
+            self._db_connect()
+            iso_lvl = importlib.import_module("psycopg2.extensions").ISOLATION_LEVEL_AUTOCOMMIT
+            self.__conn.set_isolation_level(iso_lvl)
+            self.__cur = self.__conn.cursor()
+            self.__cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = dbname")
+            exists_db = self.__cur.fetchone()[0]
+            if not exists_db:
+                print(f"Db {dbname} Not Exists")
+            else:
+                self.__cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
+            self._close()
+        except Error as err:
+            print(err)
+
+    def creat_table(self, tables_name):
+
+        for table in tables_name:
+            self._db_connect()
+            self.__cur.execute(F"CREATE TABLE *{tables_name}*();")
+
+    def create_columns(self, table_name, columns: dict):
+        for column_name, value in self.columns.items():
+            self.__cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {value[0]};")
+            # self.__cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {new_column_name} data_type constraint;")
+            if len(value) >= 2:
+                self.intro_key(table_name, column_name)
+        self._close()
+
+    def intro_key(self, table_name, new_column_name):
+        if new_column_name[1] == "primary":
+            self.__cur.execute(f"alter table {table_name} add primary key {new_column_name[0]};")
+        else:
+            self.__cur.execute(
+                f"alter table {table_name} add foreign key (employee_number) EFERENCES {new_column_name[2]} {new_column_name[0]}")
+        self._close()
+
+    connection_database()
+
 
 class Database:
 
