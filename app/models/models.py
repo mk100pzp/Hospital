@@ -1,5 +1,6 @@
 from venv import logger
 from app.database import db
+import os
 
 class User:
     def __init__(self, user_name, user_pass, user_email, user_mobile):
@@ -86,7 +87,7 @@ class Doctor(User,Mixinsearch):
         self.visit_price = visit_price
         
     @classmethod
-    def serch_doctor_information(cls):
+    def search_doctor_information(cls):
         dict_information=cls.get_information("doctor")
         if dict_information:
             print(f"""
@@ -195,6 +196,13 @@ class Paient(User,Mixinsearch):
 
         except KeyError:
             print("there isn't any doctor for entered name :")
+    @classmethod
+    def show_visit_time():
+        user_name = input("Please enter your username: ")
+        password = input("Please enter your password: ")
+        dict_time=db.Database.cached_visit_time(user_name,password)
+        print(dict_time)
+        
 
 
 class Visit_Form:
@@ -203,6 +211,15 @@ class Visit_Form:
         self.visit_desc = visit_desc
         self.hospitalization = hospitalization
         self.duration_of_hospitalization = duration_of_hospitalization
+
+    @staticmethod
+    def show_number_visit():
+        doctor_id = input("Please enter doctor id : ")
+        patient_id = input("Please enter patient id : ")
+        dict_visit=db.Database.search_number_visit(doctor_id,patient_id)
+        print(dict_visit)
+
+
         
 
     
@@ -225,7 +242,7 @@ class Visit_Date:
         else:
             print("please try again!")
     
-    @staticmethod
+    @classmethod
     def remove_visit_time():
         id_visit_time=input("please enter id_visit_time: ")
         if db.remove_visit_time(id_visit_time):
@@ -244,6 +261,17 @@ class Paient_Bill:
         self.total_amount = total_amount
         self.paient_share = paient_share
         self.insurance_contribution = insurance_contribution
+
+    def show_bill():
+        user_name = input("Please enter your username: ")
+        password = input("Please enter your password: ")
+        dict_bill=db.Database.search_bill(user_name, password)
+        print(dict_bill)
+
+    def show_income_hospital():
+        income=db.Database.search_income()
+        print(income)
+
 
     
     
@@ -271,4 +299,14 @@ class Medical_Record(Paient):
         return
 
 
-    
+def show_log_info():
+    parent_path = os.getcwd()
+    path_windows=os.path.join(parent_path,"app\\logging\\log_error" + ".txt")
+    path_vs=path_windows.replace("\\","/")
+    os.system(f"notepad.exe {path_vs}")
+
+def show_log_error():
+   parent_path = os.getcwd()
+   path_windows=os.path.join(parent_path,"app\\logging\\log_info" + ".txt")
+   path_vs=path_windows.replace("\\","/")
+   os.system(f"notepad.exe {path_vs}")

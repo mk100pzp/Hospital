@@ -69,12 +69,12 @@ enter=[{
                                 
                                     {"function":[auth.Authentication.login_patient],
                                     "name":"show catched visit time",
-                                    "action":[db.Database.catched_visit_time]
+                                    "action":[models.Paient.show_visit_time]
                                     },
 
                                     {"function":[auth.Authentication.login_patient],
                                     "name":"show bill",
-                                    "action":[db.Database.show_bill]
+                                    "action":[models.Paient_Bill.show_bill]
                                     },
 
                                     {"function":[auth.Authentication.login_patient],
@@ -100,13 +100,13 @@ enter=[{
                                     {
                                         "function":[auth.Authentication.login_admin],
                                         "name":"show patient information",
-                                    "action":[db.Database.show_patient_information]
+                                    "action":[models.Paient.search_patient_information]
                                     },
 
                                     {
                                         "function":[auth.Authentication.login_admin],
                                         "name":"show doctor information",
-                                    "action":[db.Database.show_doctor_information]
+                                    "action":[models.Doctor.search_doctor_information]
                                     },
 
                                     {  "function":[auth.Authentication.login_admin],
@@ -117,20 +117,20 @@ enter=[{
                                     {
                                         "function":[auth.Authentication.login_admin],
                                         "name":"show number of patient's visits",
-                                    "action":[db.Database.show_number_visits]
+                                    "action":[models.Visit_Form.show_number_visit]
                                     },
 
                                     {   "function":[auth.Authentication.login_admin],
                                         "name":"income of hospital",
-                                    "action":[db.Database.show_income_hospital]
+                                    "action":[models.Paient_Bill.show_income_hospital]
                                     },
                                     {   "function":[auth.Authentication.login_admin],
                                         "name":"show log info ",
-                                    "action":[db.Database.show_log_info]
+                                    "action":[models.show_log_info]
                                     },
                                     {   "function":[auth.Authentication.login_admin],
                                         "name":"show log error",
-                                    "action":[db.Database.show_log_error]
+                                    "action":[models.show_log_error]
                                     }
 
                                                             ]
