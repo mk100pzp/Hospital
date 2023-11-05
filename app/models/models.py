@@ -65,10 +65,15 @@ class Admin(User):
 
 # this class add search ability to doctor and patient class
 class Mixinsearch:
-    def get_information(role)->dict:
-        name=input("please  name : ")
-        dict_information=db.search_database_information(role,name)
-        return dict_information
+    def get_information(self,role)->dict:
+        try: 
+            name=input("please  name : ")
+            dict_information=db.Database.search_database_information(role,name)
+            return dict_information
+
+        except Exception as e:
+            logger.error(f"Error retrieving {role} information: {str(e)}")
+            return {}
     
 class Doctor(User,Mixinsearch):
     def __init__(self,user_name, user_pass_1, user_email, user_mobile,doctor_name , experties, work_experienceit, salary, address, visit_price):
