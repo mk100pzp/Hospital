@@ -1,4 +1,5 @@
-from database.db import Database
+from app.database import db
+
 class User:
     def __init__(self, user_name, user_pass, user_email, user_mobile):
         self.user_name = user_name
@@ -19,13 +20,13 @@ class Admin(User):
         user_email=input("please enter your email: ")
         user_mobile=input("please enter your phone: ")
         admin_obj=cls(user_name,user_pass,user_email,user_mobile)
-        Database.save_admin(admin_obj)
+        db.save_admin(admin_obj)
 
 # this class add search ability to doctor and patient class
 class Mixinsearch:
     def get_information(role)->dict:
         name=input("please  name : ")
-        dict_information=Database.search_database_information(role,name)
+        dict_information=db.search_database_information(role,name)
         return dict_information
     
 class Doctor(User,Mixinsearch):
@@ -65,7 +66,7 @@ class Doctor(User,Mixinsearch):
         # calculate all income of a doctor 
         user_name=input("please enter a user name: ")
         user_pass=input("please enter a password: ")
-        incom=Database.calculate_visit_incom_doctor(user_name,user_pass)
+        incom=db.calculate_visit_incom_doctor(user_name,user_pass)
         print(f"the incom of that doctor is {incom}")
         
 
@@ -81,13 +82,13 @@ class Paient(User,Mixinsearch):
         # get information to create visit and create object from that ,call show_visit_form from database module
         username=input("please enter your username:  ")
         password=input("please enter your password: ")
-        dict_information=Database.search_visit_form(username, password)
+        dict_information=db.search_visit_form(username, password)
         print(dict_information)
 
     @classmethod
     def get_visit_time(cls):
         try:
-            dict_time=Database.search_empty_time()
+            dict_time=db.search_empty_time()
             for num, time in dict_time.items():
                 print(num, ":", time)
             choise_num=input("Please enter a number to get :  ")
@@ -96,7 +97,7 @@ class Paient(User,Mixinsearch):
             visit_id=dict_choise_time["visit_id"]
             user_name=input("Please enter your user name: ")
             password=input("Please enter your password: ")
-            if Database.save_visit_time(visit_id,user_name,password):
+            if db.save_visit_time(visit_id,user_name,password):
                 print("your visit time is saved")
             else:
                 ("sorry please try again later")
@@ -107,7 +108,7 @@ class Paient(User,Mixinsearch):
 
     def cancel_visit_time():
         id_visit=input("Please enter id of your visit time")
-        if Database.cancel_visit_time(id_visit):
+        if db.cancel_visit_time(id_visit):
             print("your visit time cancelled! ")
         else:
             print("please try again later")
@@ -155,7 +156,7 @@ class Visit_Date:
         password=input("please enter your password :")
         visit_date=input("please enter visit date like '07/01/2019 07:00:00': ")
         obj=Visit_Date(username,password, visit_date)
-        if Database.add_visit_time(obj):
+        if db.add_visit_time(obj):
             print("Adding visit time successfully")
         else:
             print("please try again!")
@@ -163,7 +164,7 @@ class Visit_Date:
     @staticmethod
     def remove_visit_time():
         id_visit_time=input("please enter id_visit_time: ")
-        if Database.remove_visit_time(id_visit_time):
+        if db.remove_visit_time(id_visit_time):
             print("Adding visit time successfully")
         else:
             print("please try again!")
