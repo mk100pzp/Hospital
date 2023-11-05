@@ -170,16 +170,12 @@ class Paient(User,Mixinsearch):
             print(f"An error occurred: {e}")
 
 
-    @classmethod
-    def cancel_visit_time(cls):
-        try:
-            id_visit = input("Please enter the ID of your visit time: ")
-            if db.cancel_visit_time(id_visit):
-                print("Your visit time has been canceled.")
-            else:
-                print("Sorry, please try again later.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+    def cancel_visit_time():
+        id_visit=input("Please enter id of your visit time")
+        if db.cancel_visit_time(id_visit):
+            print("your visit time cancelled! ")
+        else:
+            print("please try again later")
         
     @classmethod
     def search_patient_information(cls):
