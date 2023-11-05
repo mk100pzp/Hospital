@@ -4,6 +4,7 @@ from venv import logger
 from app.database import db
 import os
 
+hospital_db =db.DbPostgresManager()
 class User:
     def __init__(self, user_name, user_pass, user_email, user_mobile):
         self.user_name = user_name
@@ -25,7 +26,10 @@ class Admin(User):
             user_email = input("Please enter your email: ")
             user_mobile = input("Please enter your phone: ")
             admin_obj = cls(user_name, user_pass, user_email, user_mobile)
-            db.Database.save_admin(admin_obj)
+            hospital_db.insert_table("users", [ "user_name","user_pass", "user_email", "user_mobile"],
+                      [admin_obj.user_name,admin_obj.user_pass,admin_obj.user_email,admin_obj.user_mobile])
+            user_id=hospital_db.select(table_name=["users"], select_options=["user_id"])
+            hospital_db.insert_table("admin",["users_user_id"],[user_id])
 
             print("New admin added successfully!")
 
@@ -34,35 +38,10 @@ class Admin(User):
 
 
     def list_patients(self):
-        try:
-            db_connection, db_cursor = db.Database()._db_connect()
-            query = "SELECT * FROM patient"
-            db_cursor.execute(query)
-            patients = db_cursor.fetchall()
-            db.Database()._close()
-
-            print("List of Patients:")
-            for patient in patients:
-                print(f"Patient ID: {patient[0]}, Name: {patient[1]}, Email: {patient[3]}, Mobile: {patient[4]}")
-
-        except Exception as e:
-            logger.error(f"Error listing : {str(e)}")
-
+        hospital_db.show_table(["users"],"INNER JOIN patients ON  users.user_id = patients.users_user_id;")
 
     def list_doctors(self):
-        try:
-            db_connection, db_cursor = db.Database()._db_connect()
-            query = "SELECT * FROM doctor"
-            db_cursor.execute(query)
-            doctors = db_cursor.fetchall()
-            db.Database()._close()
-
-            print("List of Doctors:")
-            for doctor in doctors:
-                print(f"Doctor ID: {doctor[0]}, Name: {doctor[1]}, Email: {doctor[3]}, Mobile: {doctor[4]}")
-
-        except Exception as e:
-            logger.error(f"Error listing doctors: {str(e)}")
+        hospital_db.show_table(["users"],"INNER JOIN doctors ON  users.user_id = doctors.users_user_id;")
 
     
 
@@ -115,8 +94,12 @@ class Doctor(User,Mixinsearch):
         try :  
             user_name=input("please enter a user name: ")
             user_pass=input("please enter a password: ")
-            incom=db.calculate_visit_incom_doctor(user_name,user_pass)
-            print(f"the incom of that doctor is {incom}")
+            str_information=hospital_db.select_table(table_name=["users"], select_options=["visit_price","count(visit_id)"],
+                filter_options=["users_name","=",user_name,"patients_patient_id","IS NOT"," NULL"],group_options=["visit_dates.doctors_doctor_id"],
+               join_query="JOIN doctors ON users.user_id = doctors.users_user_id JOIN visit_date ON visit_dates.doctors_doctor_id = doctors.doctor_id   ;")
+            list_information=str_information.split(", ")
+            income=list_information[0]*list_information[1]
+            print(income)
 
         except Exception as e:
             print(f"An error occurred: {e}")

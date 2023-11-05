@@ -204,7 +204,7 @@ class DbPostgresManager:
 
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
-               logical_operator: str = None,join_query:str=None):
+               join_query:str=None):
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -222,6 +222,7 @@ class DbPostgresManager:
                 limit:          The maximum number of records to retrieve
 
        """
+        
         try:
             self._db_connect()
             query = "SELECT "
@@ -255,16 +256,19 @@ class DbPostgresManager:
 
             self.__cur.execute(query)
             self.data = self.__cur.fetchall()
-            print(self.data)
+            
             # self.select_columns = [desc[0] for desc in self.__cur.description]
             # self.show_table(table_name)
 
             self._close()
+            return self.data
 
         except Error as err:
             print(err)
-
-    def show_table(self, table_name):
+    
+    def show_table(self,table_name: list, limit=None, select_options: list = None,
+               filter_options: list = None, order_options: list = None, group_options: list = None,
+               logical_operator: str = None,join_query:str=None):
         """
         Display the contents of a table.
 
@@ -273,6 +277,9 @@ class DbPostgresManager:
         table_name : str
             The name of the table to display.
         """
+        self.select_table(table_name, limit, select_options,
+                          filter_options, order_options,
+                            group_options,logical_operator,join_query)
         try:
             if self.data:
                 print(f"Table: {table_name}")
@@ -404,7 +411,7 @@ first_db.insert_table("patients", ["patient_name", "patient_adress","users_user_
 # first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
 #                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
 first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
-               join_query="INNER JOIN patients ON  users_user_id = patients.users_user_id;")
+               join_query="INNER JOIN patients ON  users.user_id = patients.users_user_id;")
 # first_db.show_table("users")
 # first_db.delete_from_table("users", "user_name='shima'")
 # first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
