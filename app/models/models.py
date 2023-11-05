@@ -1,3 +1,5 @@
+import datetime
+import logging
 from venv import logger
 from app.database import db
 import os
@@ -272,6 +274,32 @@ class Paient_Bill:
         income=db.Database.search_income()
         print(income)
 
+
+    
+    @classmethod
+    def calculate_total_income(cls, time_frame):
+        try:
+            current_date = datetime.now()
+            if time_frame == "daily":
+                start_date = current_date - datetime.timedelta(days=1)
+            elif time_frame == "weekly":
+                start_date = current_date - datetime.timedelta(days=7)
+            elif time_frame == "monthly":
+                start_date = current_date - datetime.timedelta(days=30)
+            else:
+                logging.error("Invalid time frame specified.")
+                return None
+
+            start_date_str = start_date.strftime("%Y-%m-%d")
+            current_date_str = current_date.strftime("%Y-%m-%d")
+
+            total_income = db.calculate_total_income(start_date_str, current_date_str)
+            logging.info(f"Total income for the {time_frame} time frame: ${total_income}")
+            return total_income
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            return None
 
     
     
