@@ -1,5 +1,5 @@
 import bcrypt
-from app.database import db 
+from app.database import db
 from app.models import models
 
 class Authentication:

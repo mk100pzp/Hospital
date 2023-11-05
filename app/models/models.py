@@ -1,3 +1,4 @@
+from venv import logger
 from app.database import db
 
 class User:
@@ -191,7 +192,20 @@ class Medical_Record(Paient):
         self.record_id = record_id
         self.record_date = record_date
 
-    def display():
-        pass
+   
+
+    def display_visit_history(self, patient_id):
+        try:
+            db_connection, db_cursor = db.Database()._db_connect()
+            query = "SELECT COUNT(*) FROM doctor_visit WHERE patient_id = %s"
+            db_cursor.execute(query, (patient_id,))
+            visit_count = db_cursor.fetchone()[0]
+            db.Database()._close()
+            print(f"Patient with ID {patient_id} has been visited {visit_count} times.")
+
+        except Exception as e:
+            logger.error(f"Error displaying visit history for patient ID {patient_id}: {str(e)}")
+        return
+
 
     
