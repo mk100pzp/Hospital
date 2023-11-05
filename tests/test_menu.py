@@ -23,7 +23,7 @@ class TestMenu(unittest.TestCase):
         self.assertIn(auth.Authentication.login_patient, menu.enter[0]['children'][1]['children'][2]['function'])
         self.assertIn(models.Paient.get_visit_time, menu.enter[0]['children'][1]['children'][2]['action'])
 
-    # Add more test cases for other functions and actions
+    # Add more test cases for other functions and actions-anything else?
 
 
 if __name__ == '__main__':
