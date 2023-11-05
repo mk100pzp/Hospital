@@ -23,9 +23,9 @@ class Admin(User):
 
 # this class add search ability to doctor and patient class
 class Mixinsearch:
-    def get_information()->dict:
+    def get_information(role)->dict:
         name=input("please  name : ")
-        dict_information=Database.serch_database_information("doctor",name)
+        dict_information=Database.search_database_information(role,name)
         return dict_information
     
 class Doctor(User,Mixinsearch):
@@ -40,7 +40,7 @@ class Doctor(User,Mixinsearch):
         
     @classmethod
     def serch_doctor_information(cls):
-        dict_information=cls.get_information()
+        dict_information=cls.get_information("doctor")
         try:
             print(f"""
             user id= {dict_information['user_id']}
@@ -83,6 +83,7 @@ class Paient(User,Mixinsearch):
         password=input("please enter your password: ")
         dict_information=Database.search_visit_form(username, password)
         print(dict_information)
+
     @classmethod
     def get_visit_time(cls):
         try:
@@ -101,7 +102,7 @@ class Paient(User,Mixinsearch):
                 ("sorry please try again later")
         except KeyError:
             print("please enter right number! ")
-            cls.get_information()
+            cls.get_information("patient")
 
 
     def cancel_visit_time():
@@ -140,21 +141,20 @@ class Visit_Form:
         
 
     
-
-    
-
     
 class Visit_Date:
-    def __init__(self,doctor_id, visit_date_time,patient_id="Null"):
-        self.doctor_id = doctor_id
+    def __init__(self,username,password, visit_date_time,patient_id="Null"):
+        self.username=username
+        self.password=password
         self.visit_date_time = visit_date_time
         self.patient_id = patient_id
 
     @staticmethod
     def create_visit_date():
-        doctor_id=input("please enter yor id: ")
+        username=input("please enter your username :")
+        password=input("please enter your password :")
         visit_date=input("please enter visit date like '07/01/2019 07:00:00': ")
-        obj=Visit_Date(doctor_id, visit_date)
+        obj=Visit_Date(username,password, visit_date)
         if Database.add_visit_time(obj):
             print("Adding visit time successfully")
         else:
@@ -169,11 +169,6 @@ class Visit_Date:
             print("please try again!")
 
 
-        
-
-
-        
-    
 
 
 class Paient_Bill:
@@ -189,8 +184,13 @@ class Paient_Bill:
     
     
 
-class Medical_Record:
-    def __init__(self):
+class Medical_Record(Paient):
+    def __init__(self, patient_name,record_id, record_date):
+        Paient.__init__(self,patient_name)
+        self.record_id = record_id
+        self.record_date = record_date
+
+    def display():
         pass
 
     
