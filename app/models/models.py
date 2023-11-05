@@ -45,6 +45,22 @@ class Admin(User):
         except Exception as e:
             logger.error(f"Error listing : {str(e)}")
 
+
+    def list_doctors(self):
+        try:
+            db_connection, db_cursor = db.Database()._db_connect()
+            query = "SELECT * FROM doctor"
+            db_cursor.execute(query)
+            doctors = db_cursor.fetchall()
+            db.Database()._close()
+
+            print("List of Doctors:")
+            for doctor in doctors:
+                print(f"Doctor ID: {doctor[0]}, Name: {doctor[1]}, Email: {doctor[3]}, Mobile: {doctor[4]}")
+
+        except Exception as e:
+            logger.error(f"Error listing doctors: {str(e)}")
+
     
 
 # this class add search ability to doctor and patient class
