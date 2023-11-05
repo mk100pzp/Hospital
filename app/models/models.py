@@ -23,6 +23,23 @@ class Admin(User):
         admin_obj=cls(user_name,user_pass,user_email,user_mobile)
         db.save_admin(admin_obj)
 
+
+    def list_patients(self):
+        try:
+            db_connection, db_cursor = db.Database()._db_connect()
+            query = "SELECT * FROM patient"
+            db_cursor.execute(query)
+            patients = db_cursor.fetchall()
+            db.Database()._close()
+            print("List of Patients:")
+            for patient in patients:
+                print(f"Patient ID: {patient[0]}, Name: {patient[1]}, Email: {patient[3]}, Mobile: {patient[4]}")
+
+        except Exception as e:
+            logger.error(f"Error listing : {str(e)}")
+
+    
+
 # this class add search ability to doctor and patient class
 class Mixinsearch:
     def get_information(role)->dict:
