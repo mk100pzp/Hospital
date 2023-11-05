@@ -2,6 +2,7 @@ import bcrypt
 from app.database import db
 from app.models import models
 
+
 class Authentication:
     def __init__(self):
         pass
@@ -11,7 +12,7 @@ class Authentication:
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed_password
-    
+
     @classmethod
     def doctor_registration(cls):
         try:
@@ -30,18 +31,19 @@ class Authentication:
             salary = float(input("Enter your salary ($) : "))
             address = input("Enter your address : ")
             visit_price = float(input("Enter visit price ($) : "))
-            doctor_obj = models.Doctor(user_name, user_pass_1, user_email, user_mobile,doctor_name , experties, work_experienceit, salary, address, visit_price)
-            if db.Database.save_doctor(doctor_obj) :
+            doctor_obj = models.Doctor(user_name, user_pass_1, user_email, user_mobile, doctor_name, experties,
+                                       work_experienceit, salary, address, visit_price)
+            if db.Database.save_doctor(doctor_obj):
                 print("Your registration successfull.")
-            else : 
+            else:
                 print("something went wrong ! please try again.")
                 cls.doctor_registration()
 
-        except :
+        except:
             print("Please enter number for mobile - work experienceit - salary - visit price")
             cls.doctor_registration()
 
-    @classmethod       
+    @classmethod
     def patient_registeration(cls):
         try:
             user_name = input("Enter your username : ")
@@ -55,50 +57,43 @@ class Authentication:
             user_mobile = int(input("Enter your email : "))
             patient_name = input("Enter your name : ")
             patient_address = int(input("Enter your addrress : "))
-            patient_obj = models.Doctor(user_name, user_pass_1, user_email, user_mobile,patient_name, patient_address)
-            if db.Database.save_patient(patient_obj) :
+            patient_obj = models.Doctor(user_name, user_pass_1, user_email, user_mobile, patient_name, patient_address)
+            if db.Database.save_patient(patient_obj):
                 print("Your registration successfull.")
-            else : 
+            else:
                 print("something went wrong ! please try again.")
                 cls.patient_registeration()
 
-        except :
+        except:
             print("Please enter number for mobile - work experienceit - salary - visit price")
             cls.patient_registeration()
 
     @staticmethod
     def login_patient():
-            print("login patient....")
-            user_name = input("Enter your username : ")
-            input_password = input("Enter your password : ")
-            if db.Database.check_exist("patient", user_name, input_password):
-                 return True
-            else:
-                 return False
+        print("login patient....")
+        user_name = input("Enter your username : ")
+        input_password = input("Enter your password : ")
+        if db.Database.check_exist("patient", user_name, input_password):
+            return True
+        else:
+            return False
 
-    @staticmethod       
+    @staticmethod
     def login_doctor():
-            print("login doctor....")
-            user_name = input("Enter your username : ")
-            input_password = input("Enter your password : ")
-            if db.Database.check_exist("doctor", user_name, input_password):
-                 return True
-            else:
-                 return False
+        print("login doctor....")
+        user_name = input("Enter your username : ")
+        input_password = input("Enter your password : ")
+        if db.Database.check_exist("doctor", user_name, input_password):
+            return True
+        else:
+            return False
 
-    @staticmethod        
+    @staticmethod
     def login_admin():
-            print("login admin....")
-            user_name = input("Enter your username : ")
-            input_password = input("Enter your password : ")
-            if db.Database.check_exist("admin", user_name, input_password):
-                 return True
-            else:
-                 return False
-
-            
-
-
-
-
-
+        print("login admin....")
+        user_name = input("Enter your username : ")
+        input_password = input("Enter your password : ")
+        if db.Database.check_exist("admin", user_name, input_password):
+            return True
+        else:
+            return False
