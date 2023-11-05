@@ -23,7 +23,7 @@ class Authentication:
                 cls.doctor_registration()
             user_pass_1 = cls.hash_password(user_pass_1)
             user_email = input("Enter your email : ")
-            user_mobile = int(input("Enter your email : "))
+            user_mobile = int(input("Enter your phone number : "))
             doctor_name = input("Enter your name :")
             experties = input("Enter your experties : ")
             work_experienceit = int(input("Enter your work experienceit (How many years?) : "))
