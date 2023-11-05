@@ -108,11 +108,15 @@ class Doctor(User,Mixinsearch):
         
            
     def search_income_visit():
-        # calculate all income of a doctor 
-        user_name=input("please enter a user name: ")
-        user_pass=input("please enter a password: ")
-        incom=db.calculate_visit_incom_doctor(user_name,user_pass)
-        print(f"the incom of that doctor is {incom}")
+        # calculate all income of a doctor
+        try :  
+            user_name=input("please enter a user name: ")
+            user_pass=input("please enter a password: ")
+            incom=db.calculate_visit_incom_doctor(user_name,user_pass)
+            print(f"the incom of that doctor is {incom}")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
         
 
 
@@ -123,40 +127,59 @@ class Paient(User,Mixinsearch):
         self.patient_name = patient_name
         self.patient_address = patient_address
 
+    @staticmethod
     def show_visit_form():
-        # get information to create visit and create object from that ,call show_visit_form from database module
-        username=input("please enter your username:  ")
-        password=input("please enter your password: ")
-        dict_information=db.search_visit_form(username, password)
-        print(dict_information)
+        try:
+            username = input("Please enter your username: ")
+            password = input("Please enter your password: ")
+            visit_form = db.search_visit_form(username, password)
+            if visit_form:
+                print("Visit Form Information:")
+                for key, value in visit_form.items():
+                    print(f"{key}: {value}")
+            else:
+                print("Visit Form not found.")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
     @classmethod
     def get_visit_time(cls):
         try:
-            dict_time=db.search_empty_time()
+            dict_time = db.search_empty_time()
             for num, time in dict_time.items():
                 print(num, ":", time)
-            choise_num=input("Please enter a number to get :  ")
-        
-            dict_choise_time=dict_time[choise_num]
-            visit_id=dict_choise_time["visit_id"]
-            user_name=input("Please enter your user name: ")
-            password=input("Please enter your password: ")
-            if db.save_visit_time(visit_id,user_name,password):
-                print("your visit time is saved")
+            choice_num = input("Please enter a number to get: ")
+            
+            if choice_num in dict_time:
+                dict_choice_time = dict_time[choice_num]
+                visit_id = dict_choice_time["visit_id"]
+                user_name = input("Please enter your username: ")
+                password = input("Please enter your password: ")
+                
+                if db.save_visit_time(visit_id, user_name, password):
+                    print("Your visit time is saved.")
+                else:
+                    print("Sorry, please try again later.")
             else:
-                ("sorry please try again later")
-        except KeyError:
-            print("please enter right number! ")
-            cls.get_information("patient")
+                print("Please enter the right number.")
+                cls.get_visit_time()
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
-    def cancel_visit_time():
-        id_visit=input("Please enter id of your visit time")
-        if db.cancel_visit_time(id_visit):
-            print("your visit time cancelled! ")
-        else:
-            print("please try again later")
+    @classmethod
+    def cancel_visit_time(cls):
+        try:
+            id_visit = input("Please enter the ID of your visit time: ")
+            if db.cancel_visit_time(id_visit):
+                print("Your visit time has been canceled.")
+            else:
+                print("Sorry, please try again later.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
         
     @classmethod
     def search_patient_information(cls):
