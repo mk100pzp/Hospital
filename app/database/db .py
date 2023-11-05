@@ -272,8 +272,6 @@ class DbPostgresManager:
         ----------
         table_name : str
             The name of the table to display.
-        selected_columns : list, optional
-            A list of column names to display. If None, all columns will be shown.
         """
         try:
             if self.data:
