@@ -164,8 +164,6 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def alter_table(self, ):
-        pass
 
     def delete_from_table(self, table_name: str, condition: dict):
         self._db_connect()
