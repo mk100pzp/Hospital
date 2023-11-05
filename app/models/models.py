@@ -45,14 +45,35 @@ class Admin(User):
         except Exception as e:
             logger.error(f"Error listing : {str(e)}")
 
+
+    def list_doctors(self):
+        try:
+            db_connection, db_cursor = db.Database()._db_connect()
+            query = "SELECT * FROM doctor"
+            db_cursor.execute(query)
+            doctors = db_cursor.fetchall()
+            db.Database()._close()
+
+            print("List of Doctors:")
+            for doctor in doctors:
+                print(f"Doctor ID: {doctor[0]}, Name: {doctor[1]}, Email: {doctor[3]}, Mobile: {doctor[4]}")
+
+        except Exception as e:
+            logger.error(f"Error listing doctors: {str(e)}")
+
     
 
 # this class add search ability to doctor and patient class
 class Mixinsearch:
-    def get_information(role)->dict:
-        name=input("please  name : ")
-        dict_information=db.search_database_information(role,name)
-        return dict_information
+    def get_information(self,role)->dict:
+        try: 
+            name=input("please  name : ")
+            dict_information=db.Database.search_database_information(role,name)
+            return dict_information
+
+        except Exception as e:
+            logger.error(f"Error retrieving {role} information: {str(e)}")
+            return {}
     
 class Doctor(User,Mixinsearch):
     def __init__(self,user_name, user_pass_1, user_email, user_mobile,doctor_name , experties, work_experienceit, salary, address, visit_price):
@@ -67,7 +88,7 @@ class Doctor(User,Mixinsearch):
     @classmethod
     def serch_doctor_information(cls):
         dict_information=cls.get_information("doctor")
-        try:
+        if dict_information:
             print(f"""
             user id= {dict_information['user_id']}
             user name= {dict_information['user_name']}
@@ -80,19 +101,22 @@ class Doctor(User,Mixinsearch):
             salary= {dict_information['salary']}
             address= {dict_information['address']}
             visit price= {dict_information['visit_price']}
-            
-""")
+            """)
 
-        except KeyError:
-            print("there isn't any doctor for entered name :")
+        else:
+            print("No doctor information found for the entered name.")
         
            
     def search_income_visit():
-        # calculate all income of a doctor 
-        user_name=input("please enter a user name: ")
-        user_pass=input("please enter a password: ")
-        incom=db.calculate_visit_incom_doctor(user_name,user_pass)
-        print(f"the incom of that doctor is {incom}")
+        # calculate all income of a doctor
+        try :  
+            user_name=input("please enter a user name: ")
+            user_pass=input("please enter a password: ")
+            incom=db.calculate_visit_incom_doctor(user_name,user_pass)
+            print(f"the incom of that doctor is {incom}")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
         
 
 
@@ -103,32 +127,47 @@ class Paient(User,Mixinsearch):
         self.patient_name = patient_name
         self.patient_address = patient_address
 
+    @staticmethod
     def show_visit_form():
-        # get information to create visit and create object from that ,call show_visit_form from database module
-        username=input("please enter your username:  ")
-        password=input("please enter your password: ")
-        dict_information=db.search_visit_form(username, password)
-        print(dict_information)
+        try:
+            username = input("Please enter your username: ")
+            password = input("Please enter your password: ")
+            visit_form = db.search_visit_form(username, password)
+            if visit_form:
+                print("Visit Form Information:")
+                for key, value in visit_form.items():
+                    print(f"{key}: {value}")
+            else:
+                print("Visit Form not found.")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
 
     @classmethod
     def get_visit_time(cls):
         try:
-            dict_time=db.search_empty_time()
+            dict_time = db.search_empty_time()
             for num, time in dict_time.items():
                 print(num, ":", time)
-            choise_num=input("Please enter a number to get :  ")
-        
-            dict_choise_time=dict_time[choise_num]
-            visit_id=dict_choise_time["visit_id"]
-            user_name=input("Please enter your user name: ")
-            password=input("Please enter your password: ")
-            if db.save_visit_time(visit_id,user_name,password):
-                print("your visit time is saved")
+            choice_num = input("Please enter a number to get: ")
+            
+            if choice_num in dict_time:
+                dict_choice_time = dict_time[choice_num]
+                visit_id = dict_choice_time["visit_id"]
+                user_name = input("Please enter your username: ")
+                password = input("Please enter your password: ")
+                
+                if db.save_visit_time(visit_id, user_name, password):
+                    print("Your visit time is saved.")
+                else:
+                    print("Sorry, please try again later.")
             else:
-                ("sorry please try again later")
-        except KeyError:
-            print("please enter right number! ")
-            cls.get_information("patient")
+                print("Please enter the right number.")
+                cls.get_visit_time()
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 
     def cancel_visit_time():
