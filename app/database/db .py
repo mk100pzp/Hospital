@@ -100,7 +100,7 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def creat_table(self):
+    def create_table(self):
         self._db_connect()
         all_tables = DbPostgresManager.reade_file(self.tables).sections()
         for table in all_tables:
@@ -164,7 +164,6 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-
     def delete_from_table(self, table_name: str, condition: dict):
         self._db_connect()
         query = f"DELETE FROM {table_name} "
@@ -205,7 +204,7 @@ class DbPostgresManager:
 
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
-               logical_operator: str = None):
+               logical_operator: str = None,join_query:str=None):
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -233,6 +232,9 @@ class DbPostgresManager:
 
             query = query + " FROM " + ",".join(table_name) + " "
 
+            if join_query:
+                query = query + join_query
+
             if filter_options:
                 # column, operator, value = zip(*filter_options)
                 if len(filter_options) > 1:
@@ -241,9 +243,6 @@ class DbPostgresManager:
                 else:
                     column, operator, value = filter_options[0]
                     query += f"WHERE {column} {operator} {value}"
-            else:
-                query += ";"
-                query = query + "WHERE " + ",".join(filter_options)
 
             if order_options:
                 query = query + "ORDER BY " + ",".join(order_options)
@@ -251,11 +250,14 @@ class DbPostgresManager:
                 query = query + "GROUP BY " + ",".join(group_options)
             if limit:
                 query = query + "LIMIT " + limit
+            else:
+                query += ";"
 
             self.__cur.execute(query)
             self.data = self.__cur.fetchall()
-            self.select_columns = [desc[0] for desc in self.__cur.description]
-            self.show_table(table_name)
+            print(self.data)
+            # self.select_columns = [desc[0] for desc in self.__cur.description]
+            # self.show_table(table_name)
 
             self._close()
 
@@ -393,15 +395,19 @@ class DbPostgresManager:
 # Test Case
 first_db = DbPostgresManager()
 
-# first_db.creat_table()
+first_db.create_table()
 # first_db.drop_table("users")
-first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-                      ["shima", "1234", "shima@gmail.com", 9123664521])
+first_db.insert_table("patients", ["patient_name", "patient_adress","users_user_id"],
+                      ["sara", "tehran", 1])
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["shima", "1234", "shima@gmail.com", "09338693536"])
+# first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
+#                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
 first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
-                filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
-first_db.show_table("users")
+               join_query="INNER JOIN patients ON  users_user_id = patients.users_user_id;")
+# first_db.show_table("users")
 # first_db.delete_from_table("users", "user_name='shima'")
-first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
-first_db.alter_table("users", {"action":"add_column","column_name":"user_mobil","column_definition":"bigint"})
+# first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
+# first_db.alter_table("users", {"action":"add_column","column_name":"user_mobil","column_definition":"bigint"})
 
 
