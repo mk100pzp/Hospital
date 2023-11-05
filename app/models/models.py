@@ -88,7 +88,7 @@ class Doctor(User,Mixinsearch):
     @classmethod
     def serch_doctor_information(cls):
         dict_information=cls.get_information("doctor")
-        try:
+        if dict_information:
             print(f"""
             user id= {dict_information['user_id']}
             user name= {dict_information['user_name']}
@@ -101,11 +101,10 @@ class Doctor(User,Mixinsearch):
             salary= {dict_information['salary']}
             address= {dict_information['address']}
             visit price= {dict_information['visit_price']}
-            
-""")
+            """)
 
-        except KeyError:
-            print("there isn't any doctor for entered name :")
+        else:
+            print("No doctor information found for the entered name.")
         
            
     def search_income_visit():
