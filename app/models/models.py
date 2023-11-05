@@ -16,12 +16,18 @@ class Admin(User):
 
     @classmethod
     def add_new_admin(cls):
-        user_name=input("please enter a user name: ")
-        user_pass=input("please enter a password: ")
-        user_email=input("please enter your email: ")
-        user_mobile=input("please enter your phone: ")
-        admin_obj=cls(user_name,user_pass,user_email,user_mobile)
-        db.save_admin(admin_obj)
+        try:
+            user_name = input("Please enter a username: ")
+            user_pass = input("Please enter a password: ")
+            user_email = input("Please enter your email: ")
+            user_mobile = input("Please enter your phone: ")
+            admin_obj = cls(user_name, user_pass, user_email, user_mobile)
+            db.Database.save_admin(admin_obj)
+
+            print("New admin added successfully!")
+
+        except Exception as e:
+            logger.error(f"Error adding a new admin: {str(e)}")
 
 
     def list_patients(self):
@@ -31,6 +37,7 @@ class Admin(User):
             db_cursor.execute(query)
             patients = db_cursor.fetchall()
             db.Database()._close()
+
             print("List of Patients:")
             for patient in patients:
                 print(f"Patient ID: {patient[0]}, Name: {patient[1]}, Email: {patient[3]}, Mobile: {patient[4]}")
