@@ -196,7 +196,7 @@ class DbPostgresManager:
                     new_col_value.append("%s" % value)
                 else:
                     new_col_value.append("'%s'" % value)
-            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id  As "
+            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id"
             self.__cur.execute(query)
             print("data insert to table")
             id = self.__cur.fetchone()
@@ -216,9 +216,9 @@ class DbPostgresManager:
         """
 
         join_clause = ''
-        for i in range(len(table_name) - 1):
-            join_clause += (f" {join_type} JOIN {table_name[i + 1]} ON "
-                            f"{on_conditions[i][i]} = {on_conditions[i][i]} ")
+        for table in range(len(table_name) - 1):
+            join_clause += (f" {join_type} JOIN {table_name[table + 1]} ON "
+                            f"{on_conditions[table][table]} = {on_conditions[table][table]} ")
             print(join_clause)
         return join_clause
 
@@ -243,7 +243,9 @@ class DbPostgresManager:
 
                 printed:        The defulted value is None, for show the result of select change it to True
 
-                join_type: the type of join clouse
+                join_type: The type of join clouse
+
+                on_conditions: The name of column for join
        """
         try:
             self._db_connect()
@@ -252,13 +254,13 @@ class DbPostgresManager:
                 query = query + ",".join(select_options)
             else:
                 query = query + "*"
+
             if len(table_name) > 1:
                 query = query + " FROM " + table_name[0] + self.join_table(join_type, table_name, on_conditions)
             else:
                 query = query + " FROM " + ",".join(table_name) + " "
 
             if filter_options:
-                # column, operator, value = zip(*filter_options)
                 if len(filter_options) > 1:
                     query += f"WHERE {' AND '.join([f'{column} {operator} {value}' for column, operator, value in filter_options])}"
 
@@ -278,7 +280,7 @@ class DbPostgresManager:
             self.data = self.__cur.fetchall()
             print(self.data)
             self.select_columns = [desc[0] for desc in self.__cur.description]
-            if printed : self.show_table(table_name)
+            if printed:self.show_table(table_name)
             self._close()
 
         except Error as err:
@@ -344,8 +346,8 @@ first_db = DbPostgresManager()
 #                       ["kaveh", "789", "sara@gmail.com", 9124568675])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", 9338693536])
-# first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
-#                       ["fariba", "saveh", 4])
+first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
+                      ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", "09338693536"])
 # first_db.insert_table("doctors", ["expertis", "work_experience", "adress", "visit_price"],
@@ -373,7 +375,6 @@ first_db.select(table_name=["users", "patients", "visit_dates"],
 # update -----------------------------------
 # first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
 # alter -----------------------------------
-
 # first_db.alter_table("users", {"action": "add_column", "column_name": "user_mobil", "column_definition": "bigint"})
 
 
