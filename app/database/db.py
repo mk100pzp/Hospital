@@ -214,24 +214,16 @@ class DbPostgresManager:
         - table_name (list): The name of the tables to join.
         - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
         """
-        # approch1
-        join_clause =''
-        for i in range(len(table_name)-1):
-            join_clause += (f" {join_type} {table_name[i + 1]} ON "
-                            f"{on_conditions[0][0]} = {on_conditions[0][1]} ")
-        return join_clause
 
-        # approch2
-        # for i in range(len(table_name)):
-        #     join_clause = f"{join_type} {table_name[i]} ON "
-        #     join_conditions = [f"{cond[0]} = {cond[2]}" for cond in on_conditions[i - 1]]
-        #     join_clause += " ".join(join_conditions)
-        #     join_clause += " "
-        #     return join_clause
+        join_clause = ''
+        for table in range(len(table_name) - 1):
+            join_clause += (f" {join_type} JOIN {table_name[table + 1]} ON "
+                            f"{on_conditions[table][table]} = {on_conditions[table][table]} ")
+        return join_clause
 
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
-               on_conditions: list = None, join_type:str = None, printed: str = False):
+               on_conditions: list = None, join_type: str = None, printed: str = False):
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -250,7 +242,9 @@ class DbPostgresManager:
 
                 printed:        The defulted value is None, for show the result of select change it to True
 
-                join_type: the type of join clouse
+                join_type: The type of join clouse
+
+                on_conditions: The name of column for join
        """
         try:
             self._db_connect()
@@ -261,12 +255,11 @@ class DbPostgresManager:
                 query = query + "*"
 
             if len(table_name) > 1:
-                query = query + " FROM "+ table_name[0] + self.join_table(join_type, table_name, on_conditions)
+                query = query + " FROM " + table_name[0] + self.join_table(join_type, table_name, on_conditions)
             else:
                 query = query + " FROM " + ",".join(table_name) + " "
 
             if filter_options:
-                # column, operator, value = zip(*filter_options)
                 if len(filter_options) > 1:
                     query += f"WHERE {' AND '.join([f'{column} {operator} {value}' for column, operator, value in filter_options])}"
 
@@ -286,7 +279,7 @@ class DbPostgresManager:
             self.data = self.__cur.fetchall()
             print(self.data)
             self.select_columns = [desc[0] for desc in self.__cur.description]
-            if printed == True: self.show_table(table_name)
+            if printed:self.show_table(table_name)
             self._close()
             return self.data
         except Error as err:
@@ -352,8 +345,8 @@ first_db = DbPostgresManager()
 #                       ["kaveh", "789", "sara@gmail.com", 9124568675])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", 9338693536])
-# first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
-#                       ["fariba", "saveh", 4])
+first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
+                      ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", "09338693536"])
 # first_db.insert_table("doctors", ["expertis", "work_experience", "adress", "visit_price"],
@@ -368,11 +361,12 @@ first_db = DbPostgresManager()
 #                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
 # first_db.select(table_name=["users","patients"], select_options=["user_name", "user_email", "user_pass"],
 #                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
-# first_db.select(table_name=["users", "patients","visit_dates"], select_options=["user_name", "user_email", "user_pass", "patient_name","visit_time"],
+# first_db.select(table_name=["users", "patients",], select_options=["user_name", "user_email", "user_pass", "patient_name"],
 #                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
-# 
-# first_db.select(table_name=["users", "patients"], select_options=["user_name", "user_email", "user_pass", "patient_name"],
-#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",printed=True)
+first_db.select(table_name=["users", "patients", "visit_dates"],
+                select_options=["user_name", "user_email", "user_pass", "patient_name", "visit_time"],
+                on_conditions=[("users.user_id", "patients.users_user_id"),
+                               ("patients.patient_id", "visit_dates.patients_patient_id")], join_type="INNER", )
 # show -----------------------------------
 # first_db.show_table("users")
 # delete -----------------------------------
@@ -380,9 +374,7 @@ first_db = DbPostgresManager()
 # update -----------------------------------
 # first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
 # alter -----------------------------------
-
 # first_db.alter_table("users", {"action": "add_column", "column_name": "user_mobil", "column_definition": "bigint"})
-
 
 
 # filter_options=[("patient_id", "=", "5")]
