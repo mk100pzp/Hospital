@@ -196,7 +196,7 @@ class DbPostgresManager:
                     new_col_value.append("%s" % value)
                 else:
                     new_col_value.append("'%s'" % value)
-            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id"
+            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id  As "
             self.__cur.execute(query)
             print("data insert to table")
             id = self.__cur.fetchone()
@@ -214,7 +214,7 @@ class DbPostgresManager:
         - table_name (list): The name of the tables to join.
         - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
         """
-    
+
         join_clause = ''
         for i in range(len(table_name) - 1):
             join_clause += (f" {join_type} JOIN {table_name[i + 1]} ON "
@@ -252,7 +252,6 @@ class DbPostgresManager:
                 query = query + ",".join(select_options)
             else:
                 query = query + "*"
-            query = query + " FROM " + ",".join(table_name) + " "
             if len(table_name) > 1:
                 query = query + " FROM " + table_name[0] + self.join_table(join_type, table_name, on_conditions)
             else:
