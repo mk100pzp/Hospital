@@ -214,8 +214,7 @@ class DbPostgresManager:
         - table_name (list): The name of the tables to join.
         - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
         """
-        # approch1
-        # first_table, second_table =
+    
         join_clause = ''
         for i in range(len(table_name) - 1):
             join_clause += (f" {join_type} JOIN {table_name[i + 1]} ON "
