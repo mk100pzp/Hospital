@@ -7,6 +7,8 @@ import importlib
 
 class DbPostgresManager:
     def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None, tables='hospital.ini'):
+        self.table_name = None
+        self.select_columns = None
         self.data = None
         self.dbps_defult = dbps_defult
         self.dbname = dbname
@@ -33,6 +35,7 @@ class DbPostgresManager:
 
     def connection_database(self):
         """Establish a connection to the PostgreSQL database to Create database for hospital project """
+
         params = self.config(self.dbps_defult, section="default_inf_connect")
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
@@ -194,32 +197,42 @@ class DbPostgresManager:
                     new_col_value.append("%s" % value)
                 else:
                     new_col_value.append("'%s'" % value)
-            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)})"
+            query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id"
             self.__cur.execute(query)
             print("data insert to table")
+            id = self.__cur.fetchone()
+            print("id = ", id[0])
             self._close()
         except Error as err:
             print(err)
 
-    def join_table(self, join_type: str, table_name:list, on_conditions:list):
+    def join_table(self, join_type: str, table_name: list, on_conditions: list):
         """
         Create a JOIN clause for the SQL query.
-    
+
         Parameters:
         - join_type (str): The type of JOIN (e.g., INNER, LEFT, RIGHT).
         - table_name (list): The name of the tables to join.
         - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
         """
-        for i in range(len(table_name)):
-            join_clause = f"{join_type} JOIN {table_name[i]} ON "
-            join_conditions = [f"{cond[0]} = {cond[2]}" for cond in on_conditions[i-1]]
-            join_clause += " ".join(join_conditions)
-            join_clause += " "
-            return join_clause       
-    
+        # approch1
+        join_clause =''
+        for i in range(len(table_name)-1):
+            join_clause += (f" {join_type} {table_name[i + 1]} ON "
+                            f"{on_conditions[0][0]} = {on_conditions[0][1]} ")
+        return join_clause
+
+        # approch2
+        # for i in range(len(table_name)):
+        #     join_clause = f"{join_type} {table_name[i]} ON "
+        #     join_conditions = [f"{cond[0]} = {cond[2]}" for cond in on_conditions[i - 1]]
+        #     join_clause += " ".join(join_conditions)
+        #     join_clause += " "
+        #     return join_clause
+
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
-               on_conditions:list=None,printed:str=False):
+               on_conditions: list = None, join_type:str = None, printed: str = False):
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -246,10 +259,10 @@ class DbPostgresManager:
             else:
                 query = query + "*"
 
-            query = query + " FROM " + ",".join(table_name) + " "
-
-            if len(table_name)>1:
-                query = query + self.join_table("INNER",table_name, on_conditions)
+            if len(table_name) > 1:
+                query = query + " FROM "+ table_name[0] + self.join_table(join_type, table_name, on_conditions)
+            else:
+                query = query + " FROM " + ",".join(table_name) + " "
 
             if filter_options:
                 # column, operator, value = zip(*filter_options)
@@ -270,8 +283,9 @@ class DbPostgresManager:
 
             self.__cur.execute(query)
             self.data = self.__cur.fetchall()
+            print(self.data)
             self.select_columns = [desc[0] for desc in self.__cur.description]
-            if printed==True : self.show_table(table_name)  
+            if printed == True: self.show_table(table_name)
             self._close()
 
         except Error as err:
@@ -297,134 +311,77 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    def alter_table(self, table_name:str, alterations:dict):
+    def alter_table(self, table_name: str, alterations: dict):
         """
         Alter the table structure by adding, dropping, or modifying columns.
-    
+
         Parameters:
         table_name (str): The name of the table to alter.
         alterations (list): A list of alteration statements, each represented as a dictionary.
         """
         try:
             self._db_connect()
-            query=f"ALTER TABLE {table_name} "
+            query = f"ALTER TABLE {table_name} "
             action = alterations.get("action")
             column_name = alterations.get("column_name")
             new_column_definition = alterations.get("column_definition")
             if action == "add_column":
                 query += f"ADD COLUMN {column_name} {new_column_definition};"
-            elif action == "drop_column": 
+            elif action == "drop_column":
                 query += f"DROP COLUMN {column_name};"
-            elif action == "modify_column": 
+            elif action == "modify_column":
                 query += f"ALTER COLUMN {column_name} SET DATA TYPE {new_column_definition};"
             else:
                 print("Invalid action specified in alteration statement.")
             self.__cur.execute(query)
-            print(f"Table '{table_name}' altered successfully.") 
+            print(f"Table '{table_name}' altered successfully.")
             self._close()
         except Error as err:
             print(err)
-
-#     #=================================================================================================
-
-# اسم کاربری و پسورد رو با ورودی مقایسه کند و اگر چنین دکتری وجود داشت ترو را برگداند
-# برای مقایسه از تابع چک پسورد استفاده کند
-# def check_exist(table_name, username, password):
-#        pass
-# @staticmethod
-# def check_password(hashed_password, input_password):
-#         return bcrypt.checkpw(input_password.encode('utf-8'), hashed_password)
-# =================================================================================================
-#     def save_doctor(obj):
-#             pass
-#     def save_admin():
-#             pass
-#     def save_patient(obj):
-#             pass
-
-#     def save_visit_time(obj):
-#             pass
-#     def remove_database_visit_time(obj):
-#             pass
-#     def get_database_visit_time(obj):
-#             pass
-# def cancel_database_visit_time(obj):
-#         # set null in patient id clumn of visit time table
-#         pass
-#     def catched_visit_time():
-#             # show all visit time for id_patient
-
-#             pass
-#     def save_patient_bill():
-#             pass
-#     def show_bill():
-#             pass
-#     def show_patient_information(obj):
-#             pass
-
-#     def show_doctor_information(obj):
-#             pass
-#     def show_income_visit(obj):
-#             # search for information of object income
-#             pass
-#     def show_number_visits():
-#             # get information for find visits and show them from database
-#             pass
-#     def show_income_hospital():
-
-#             pass
-#     def show_visit_form(obj):
-#             pass
-#     def save_medical_record(obj):
-#            pass
-#     def save_visit_form(obj):
-#            pass
-#     # ......
-
-#     def add_visit_time():
-#             pass
-
-# def edit_visit_time(): # first catch the exist time then edit it and delete old time so create edited time by call
-# save_visit_time function pass
-
-#     def remove_visit_time():
-#             pass
-#     def save_medical_record(obj):
-#            pass
-
-#     # ......
-
-#     def show_log_info():
-#             pass
-
-#     def show_log_error():
-#             pass
-
-# def serch_database_information(table_name,name)->dict: pass #     it should search in tablename for a specific name
-# in database the return dictionary if his information that their key is name of clumn and value is information # if
-# there is not any record with that name return empty dictionary
 
 
 # Test Case
 first_db = DbPostgresManager()
 
-first_db.create_table()
+# first_db.create_table()
+
 # first_db.drop_table("users")
-first_db.insert_table("users", ["user_name","user_pass","user_email","user_mobil"],
-                      ["sara", "1234", "sara@gmail.com",9124568675])
-first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-                      ["shima", "1234", "shima@gmail.com", 9338693536])
-first_db.insert_table("patients", ["patient_name", "patient_adress"],
-                      ["sara", "tehran"])
+# insert---------------------------------
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["kaveh", "789", "sara@gmail.com", 9124568675])
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["shima", "1234", "shima@gmail.com", 9338693536])
+# first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
+#                       ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", "09338693536"])
+# first_db.insert_table("doctors", ["expertis", "work_experience", "adress", "visit_price"],
+#                       ["brain", "12", "karaj", "3000"])
+# first_db.insert_table("visit_dates", ["visit_time","patients_patient_id"],
+#                       ["08/02/2023",7])
+# first_db.insert_table("visit_dates", ["visit_time"],
+#                       ["02/06/2021"])
+
+# select ---------------------------------
 # first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
 #                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
 # first_db.select(table_name=["users","patients"], select_options=["user_name", "user_email", "user_pass"],
 #                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
-first_db.show_table("users")
-first_db.delete_from_table("users", "user_name='shima'")
-first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
-first_db.alter_table("users", {"action":"add_column","column_name":"user_mobil","column_definition":"bigint"})
+# first_db.select(table_name=["users", "patients","visit_dates"], select_options=["user_name", "user_email", "user_pass", "patient_name","visit_time"],
+#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
+# 
+# first_db.select(table_name=["users", "patients"], select_options=["user_name", "user_email", "user_pass", "patient_name"],
+#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
+# show -----------------------------------
+# first_db.show_table("users")
+# delete -----------------------------------
+# first_db.delete_from_table("users", "user_name='shima'")
+# update -----------------------------------
+# first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
+# alter -----------------------------------
+
+# first_db.alter_table("users", {"action": "add_column", "column_name": "user_mobil", "column_definition": "bigint"})
 
 
+
+# filter_options=[("patient_id", "=", "5")]
