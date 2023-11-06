@@ -11,7 +11,6 @@ class TestDbPostgresManager(unittest.TestCase):
     def setUp(self):
         self.db_manager = DbPostgresManager(dbps_defult="test_database.ini", dbname='test_db')
 
-    # Perform any necessary cleanup after each test
     def tearDown(self):
         pass
 
