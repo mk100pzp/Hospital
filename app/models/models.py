@@ -10,6 +10,7 @@ from database.db import DbPostgresManager
 
 
 hospital_db =DbPostgresManager()
+hospital_db.create_table()
 class User:
     def __init__(self, user_name, user_pass, user_email, user_mobile):
         self.user_name = user_name
@@ -59,8 +60,11 @@ class Mixinsearch:
     def get_information(self,role)->dict:
         try: 
             name=input("please  name : ")
-            dict_information=db.Database.search_database_information(role,name)
-            return dict_information
+            role_list=[role]
+            role_list.append
+            return hospital_db.select(role.role_list.append("users"),
+                                      on_conditions=[("users.user_id",f"{role}.users_user_id")],
+             join_type= "INNER JOIN", printed= False)
 
         except Exception as e:
             logger.error(f"Error retrieving {role} information: {str(e)}")
@@ -80,20 +84,7 @@ class Doctor(User,Mixinsearch):
     def search_doctor_information(cls):
         dict_information=cls.get_information("doctor")
         if dict_information:
-            print(f"""
-            user id= {dict_information['user_id']}
-            user name= {dict_information['user_name']}
-            user password= {dict_information['user_pass']}
-            user email= {dict_information['user_email']}
-            user mobile= {dict_information['user_mobile']}
-            doctor id= {dict_information['doctor_id']}
-            expertis= {dict_information['expertis']}
-            work exprienceit= {dict_information['work_experienceit']}
-            salary= {dict_information['salary']}
-            address= {dict_information['address']}
-            visit price= {dict_information['visit_price']}
-            """)
-
+            print(dict_information)
         else:
             print("No doctor information found for the entered name.")
         
@@ -103,9 +94,9 @@ class Doctor(User,Mixinsearch):
         try :  
             user_name=input("please enter a user name: ")
             user_pass=input("please enter a password: ")
-            str_information=hospital_db.select_table(table_name=["users"], select_options=["visit_price","count(visit_id)"],
-                filter_options=["users_name","=",user_name,"patients_patient_id","IS NOT"," NULL"],group_options=["visit_dates.doctors_doctor_id"],
-               join_query="JOIN doctors ON users.user_id = doctors.users_user_id JOIN visit_date ON visit_dates.doctors_doctor_id = doctors.doctor_id   ;")
+            str_information=hospital_db.select(table_name=["users","doctors","visit_dates"], select_options=["visit_price","count(visit_id)"],
+               filter_options= ["users_name","=",user_name,"patients_patient_id","IS NOT"," NULL"],group_options= ["visit_dates.doctors_doctor_id"],
+               on_conditions= [("users.suer_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")], join_type= "INNER JOIN")
             list_information=str_information.split(", ")
             income=list_information[0]*list_information[1]
             print(income)
@@ -127,6 +118,9 @@ class Paient(User,Mixinsearch):
         try:
             username = input("Please enter your username: ")
             password = input("Please enter your password: ")
+            hospital_db.select(table_name=["users","patients","visit_dates","visit_forms","doctors"], 
+                               select_options=["visit_forms.visit_form_id","visit_forms.from_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","visit_forms.visit_dates_id",'doctors.doctor_name'],
+               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",username)],on_conditions= [("users.suer_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER JOIN",printed=True )
             visit_form = db.search_visit_form(username, password)
             if visit_form:
                 print("Visit Form Information:")
@@ -331,7 +325,10 @@ def show_log_error():
    path_vs=path_windows.replace("\\","/")
    os.system(f"notepad.exe {path_vs}")
 
-   first_admin=Admin("fariba","123","fariba@gmail.com","9123546845")
-
+   first_admin=Admin("fariba","123","fariba@gmail.com",9123546845)
+   first_doctor=Doctor("fariba","123","fariba@gmail.com",91263087458,"rezaei","general","20",600,"london",14)
+   first_patient=Paient("shayan","564","shayan@gmail.com",9374586578,"shayan","toronto",)
    first_admin.list_patients()
    first_admin.list_doctors()
+   first_doctor.search_income_visit()
+   first_patient.show_visit_form()
