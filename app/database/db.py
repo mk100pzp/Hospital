@@ -213,7 +213,7 @@ class DbPostgresManager:
         for i in range(len(table_name)):
             join_clause = f"{join_type} JOIN {table_name[i]} ON "
             join_conditions = [f"{cond[0]} = {cond[2]}" for cond in on_conditions[i-1]]
-            join_clause += join_conditions 
+            join_clause += " ".join(join_conditions)
             join_clause += " "
             return join_clause       
     
