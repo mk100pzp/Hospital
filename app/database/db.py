@@ -169,7 +169,6 @@ class DbPostgresManager:
     def delete_from_table(self, table_name: str, condition: dict):
         self._db_connect()
         query = f"DELETE FROM {table_name} "
-        # query = f"DELETE FROM {table_name} RETURNING (select_list | *)"
         if condition:
             query += f"WHERE {condition};"
         else:
@@ -216,6 +215,7 @@ class DbPostgresManager:
         - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
         """
         # approch1
+<<<<<<< HEAD
         join_clause =''
         for i in range(len(table_name)-1):
             join_clause += (f" {join_type} {table_name[i + 1]} ON "
@@ -233,6 +233,19 @@ class DbPostgresManager:
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
                on_conditions: list = None, join_type:str = None, printed: str = False):
+=======
+        # first_table, second_table =
+        join_clause = ''
+        for i in range(len(table_name) - 1):
+            join_clause += (f" {join_type} JOIN {table_name[i + 1]} ON "
+                            f"{on_conditions[i][i]} = {on_conditions[i][i]} ")
+            print(join_clause)
+        return join_clause
+
+    def select(self, table_name: list, limit=None, select_options: list = None,
+               filter_options: list = None, order_options: list = None, group_options: list = None,
+               on_conditions: list = None, join_type: str = None, printed: str = False):
+>>>>>>> 31709de854d2e512c613701020c91af15648f561
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -250,6 +263,8 @@ class DbPostgresManager:
                 limit:          The maximum number of records to retrieve
 
                 printed:        The defulted value is None, for show the result of select change it to True
+
+                join_type: the type of join clouse
        """
         try:
             self._db_connect()
@@ -258,9 +273,15 @@ class DbPostgresManager:
                 query = query + ",".join(select_options)
             else:
                 query = query + "*"
+<<<<<<< HEAD
 
             if len(table_name) > 1:
                 query = query + " FROM "+ table_name[0] + self.join_table(join_type, table_name, on_conditions)
+=======
+            query = query + " FROM " + ",".join(table_name) + " "
+            if len(table_name) > 1:
+                query = query + " FROM " + table_name[0] + self.join_table(join_type, table_name, on_conditions)
+>>>>>>> 31709de854d2e512c613701020c91af15648f561
             else:
                 query = query + " FROM " + ",".join(table_name) + " "
 
@@ -285,7 +306,11 @@ class DbPostgresManager:
             self.data = self.__cur.fetchall()
             print(self.data)
             self.select_columns = [desc[0] for desc in self.__cur.description]
+<<<<<<< HEAD
             if printed == True: self.show_table(table_name)
+=======
+            if printed : self.show_table(table_name)
+>>>>>>> 31709de854d2e512c613701020c91af15648f561
             self._close()
 
         except Error as err:
@@ -367,11 +392,20 @@ first_db = DbPostgresManager()
 #                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
 # first_db.select(table_name=["users","patients"], select_options=["user_name", "user_email", "user_pass"],
 #                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
+<<<<<<< HEAD
 # first_db.select(table_name=["users", "patients","visit_dates"], select_options=["user_name", "user_email", "user_pass", "patient_name","visit_time"],
 #                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
 # 
 # first_db.select(table_name=["users", "patients"], select_options=["user_name", "user_email", "user_pass", "patient_name"],
 #                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
+=======
+# first_db.select(table_name=["users", "patients",], select_options=["user_name", "user_email", "user_pass", "patient_name"],
+#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
+first_db.select(table_name=["users", "patients", "visit_dates"],
+                select_options=["user_name", "user_email", "user_pass", "patient_name", "visit_time"],
+                on_conditions=[("users.user_id", "patients.users_user_id"),
+                               ("patients.patient_id", "visit_dates.patients_patient_id")], join_type="INNER", )
+>>>>>>> 31709de854d2e512c613701020c91af15648f561
 # show -----------------------------------
 # first_db.show_table("users")
 # delete -----------------------------------
@@ -383,5 +417,9 @@ first_db = DbPostgresManager()
 # first_db.alter_table("users", {"action": "add_column", "column_name": "user_mobil", "column_definition": "bigint"})
 
 
+<<<<<<< HEAD
 
 # filter_options=[("patient_id", "=", "5")]
+=======
+# filter_options=[("patient_id", "=", "5")]
+>>>>>>> 31709de854d2e512c613701020c91af15648f561
