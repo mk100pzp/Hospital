@@ -1,10 +1,15 @@
 import datetime
 import logging
 from venv import logger
-from app.database import db
 import os
+import sys
+from pathlib import Path
+project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_folder)
+from database.db import DbPostgresManager
 
-hospital_db =db.DbPostgresManager()
+
+hospital_db =DbPostgresManager()
 class User:
     def __init__(self, user_name, user_pass, user_email, user_mobile):
         self.user_name = user_name
@@ -38,10 +43,14 @@ class Admin(User):
 
 
     def list_patients(self):
-        hospital_db.show_table(["users"],"INNER JOIN patients ON  users.user_id = patients.users_user_id;")
+        hospital_db.select(self, table_name=["users","patients"],
+                           on_conditions=[("users.user_id","patients.users_user_id")],
+                             join_type = "INNER JOIN", printed = True)
 
     def list_doctors(self):
-        hospital_db.show_table(["users"],"INNER JOIN doctors ON  users.user_id = doctors.users_user_id;")
+        hospital_db.select(self, table_name=["users","doctors"],
+                           on_conditions=[("users.user_id","doctors.users_user_id")],
+                             join_type = "INNER JOIN", printed = True)
 
     
 
@@ -321,3 +330,8 @@ def show_log_error():
    path_windows=os.path.join(parent_path,"app\\logging\\log_info" + ".txt")
    path_vs=path_windows.replace("\\","/")
    os.system(f"notepad.exe {path_vs}")
+
+   first_admin=Admin("fariba","123","fariba@gmail.com","9123546845")
+
+   first_admin.list_patients()
+   first_admin.list_doctors()
