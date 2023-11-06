@@ -201,9 +201,25 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
+    def join_table(self, join_type: str, table_name:list, on_conditions:list):
+        """
+        Create a JOIN clause for the SQL query.
+    
+        Parameters:
+        - join_type (str): The type of JOIN (e.g., INNER, LEFT, RIGHT).
+        - table_name (list): The name of the tables to join.
+        - on_conditions (list of tuples): List of ON tuples the tuple contain of columns name for the JOIN.
+        """
+        for i in range(len(table_name)):
+            join_clause = f"{join_type} JOIN {table_name[i]} ON "
+            join_conditions = [f"{cond[0]} = {cond[2]}" for cond in on_conditions[i-1]]
+            join_clause += join_conditions 
+            join_clause += " "
+            return join_clause       
+    
     def select(self, table_name: list, limit=None, select_options: list = None,
                filter_options: list = None, order_options: list = None, group_options: list = None,
-               join_query:str=None,printed:str=False):
+               on_conditions:list=None,printed:str=False):
         """
             Read data from a table in the database can choose to read only some
             specific fields
@@ -232,8 +248,8 @@ class DbPostgresManager:
 
             query = query + " FROM " + ",".join(table_name) + " "
 
-            if join_query:
-                query = query + join_query
+            if len(table_name)>1:
+                query = query + self.join_table("INNER",table_name, on_conditions)
 
             if filter_options:
                 # column, operator, value = zip(*filter_options)
@@ -243,7 +259,6 @@ class DbPostgresManager:
                 else:
                     column, operator, value = filter_options[0]
                     query += f"WHERE {column} {operator} {value}"
-
             if order_options:
                 query = query + "ORDER BY " + ",".join(order_options)
             if group_options:
@@ -399,17 +414,17 @@ first_db.insert_table("users", ["user_name","user_pass","user_email","user_mobil
                       ["sara", "1234", "sara@gmail.com",9124568675])
 first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
                       ["shima", "1234", "shima@gmail.com", 9338693536])
-first_db.insert_table("patients", ["patient_name", "patient_adress","users_user_id"],
-                      ["sara", "tehran", 1])
+first_db.insert_table("patients", ["patient_name", "patient_adress"],
+                      ["sara", "tehran"])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", "09338693536"])
 # first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
 #                 filter_options=[("user_pass", "=", "'1234'")], group_options=["user_id"], logical_operator="AND")
-first_db.select(table_name=["users"], select_options=["user_name", "user_email", "user_pass"],
-               join_query="INNER JOIN patients ON  users_user_id = patients.users_user_id;",printed=True)
-# first_db.show_table("users")
-# first_db.delete_from_table("users", "user_name='shima'")
-# first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
-# first_db.alter_table("users", {"action":"add_column","column_name":"user_mobil","column_definition":"bigint"})
+# first_db.select(table_name=["users","patients"], select_options=["user_name", "user_email", "user_pass"],
+#                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
+first_db.show_table("users")
+first_db.delete_from_table("users", "user_name='shima'")
+first_db.update_table("users", {"user_name": "'ali'"}, [("user_name", "=", "'shima'")])
+first_db.alter_table("users", {"action":"add_column","column_name":"user_mobil","column_definition":"bigint"})
 
 
