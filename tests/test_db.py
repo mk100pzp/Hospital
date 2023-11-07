@@ -1,34 +1,38 @@
 import unittest
-import os
-import sys
-from unittest.mock import Mock
+import psycopg2
+from unittest.mock import patch,Mock
+from pathlib import Path
+import sys,os
+
+project_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_folder)
 from app.database.db import DbPostgresManager
-from pgmock import MockConnection, connect, pgmock
 
-
-project_root = os.path.abspath(os.path.dirname(__file__))
-child_directory =os.path.join(os.path.join(project_root, 'app'),'database')
-sys.path.insert(0, child_directory)
-from db import DbPostgresManager  
-
-class TestDbPostgresManager(unittest.TestCase):
-
+class TestStringMethods(unittest.TestCase): 
+    mock_params = {
+            'dbname': 'postgres',
+            'user': 'postgres',
+            'port': 5432,
+            'host': 'localhost',
+            'password': 'Shad_M72770',
+    }
+    manager=DbPostgresManager(dbps_defult="database.ini", dbname='test_db', password=None, tables='None')
     def setUp(self):
-        self.db_manager = DbPostgresManager(dbps_defult="test_database.ini", dbname='test_db')
-        self.db_manager._db_connect = Mock()
-
+        # Create a mock for psycopg2.connect
+        self.manager.config=Mock()
+        self.manager.config.return_value=self.mock_params 
+    manager=DbPostgresManager(dbps_defult="database.ini", dbname='test_db', password=None, tables='None')
+    def test_connection_database(self):
+           result=self.manager.connection_database()
+           self.assertEqual(result["dbname"], 'test_db') 
+           psycopg2.connect= Mock()
+           cur=psycopg2.connect.cursor
+           self.manager.dbname='checkingtest_db'
+           result=self.manager.connection_database()
+           self.assertNotEqual(result["dbname"], 'test_db') 
+    
     def tearDown(self):
         pass
-
-    def test_connection_database(self):
-        self.db_manager.config = Mock(return_value={
-            'host': 'localhost',
-            'port': '5432',
-            'user': 'test_user',
-            'password': 'test_password'
-        })
-        
-        mock_connect = Mock()
 
 
     def test_db_connect(self):
@@ -60,6 +64,9 @@ class TestDbPostgresManager(unittest.TestCase):
 
     def test_alter_table(self):
         pass
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
