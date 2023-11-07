@@ -279,7 +279,7 @@ class DbPostgresManager:
             self.data = self.__cur.fetchall()
             print(self.data)
             self.select_columns = [desc[0] for desc in self.__cur.description]
-            if printed:self.show_table(table_name)
+            if printed== True:self.show_table(table_name)
             self._close()
             return self.data
         except Error as err:
@@ -348,7 +348,7 @@ first_db = DbPostgresManager()
 # first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
 #                       ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-#                       ["shima", "1234", "shima@gmail.com", "09338693536"])
+#                       ["shima", "1234", "shima@gmail.com", 9338693536])
 # first_db.insert_table("doctors", ["expertis", "work_experience", "adress", "visit_price"],
 #                       ["brain", "12", "karaj", "3000"])
 # first_db.insert_table("visit_dates", ["visit_time","patients_patient_id"],
