@@ -21,20 +21,37 @@ class TestStringMethods(unittest.TestCase):
         # Create a mock for psycopg2.connect
         self.manager.config=Mock()
         self.manager.config.return_value=self.mock_params 
-    manager=DbPostgresManager(dbps_defult="database.ini", dbname='test_db', password=None, tables='None')
     def test_connection_database(self):
            result=self.manager.connection_database()
            self.assertEqual(result["dbname"], 'test_db') 
            self.manager.dbname='checkingtest_db'
            result=self.manager.connection_database()
            self.assertNotEqual(result["dbname"], 'test_db') 
-    
-    def tearDown(self):
-        pass
 
+    def tearDown(self):
+        self.manager.dbname='test_db'
+    
 
     def test_db_connect(self):
-        pass
+        with unittest.mock.patch('psycopg2.connect') as mock_connect:
+            mock_conn = Mock()
+            mock_cur = Mock()
+            mock_conn.cursor.return_value = mock_cur
+            mock_connect.return_value = mock_conn
+            
+            result_conn, result_cur = self.manager._db_connect()
+            self.assertEqual(result_conn, mock_conn)
+            self.assertEqual(result_cur, mock_cur)
+
+        # Test the case where psycopg2.connect returns None (error)
+        with unittest.mock.patch('psycopg2.connect') as mock_connect:
+            mock_connect.return_value = None
+            self.assertIsNone(self.manager._db_connect())
+
+        # Check the exception message  
+        with unittest.mock.patch('psycopg2.connect') as mock_connect:
+            mock_connect.return_value ="OperationalError"
+            self.assertRaises(TypeError,self.manager._db_connect()) 
 
     def test_drop_database(self):
         pass
