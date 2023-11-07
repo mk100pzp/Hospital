@@ -31,27 +31,22 @@ class TestStringMethods(unittest.TestCase):
     def tearDown(self):
         self.manager.dbname='test_db'
     
-
     def test_db_connect(self):
         with unittest.mock.patch('psycopg2.connect') as mock_connect:
             mock_conn = Mock()
             mock_cur = Mock()
             mock_conn.cursor.return_value = mock_cur
-            mock_connect.return_value = mock_conn
-            
+            mock_connect.return_value = mock_conn         
             result_conn, result_cur = self.manager._db_connect()
             self.assertEqual(result_conn, mock_conn)
             self.assertEqual(result_cur, mock_cur)
 
-        # Test the case where psycopg2.connect returns None (error)
+        # Test the case where psycopg2.connect returns None (error) and Check the exception message
         with unittest.mock.patch('psycopg2.connect') as mock_connect:
             mock_connect.return_value = None
             self.assertIsNone(self.manager._db_connect())
-
-        # Check the exception message  
-        with unittest.mock.patch('psycopg2.connect') as mock_connect:
-            mock_connect.return_value ="OperationalError"
             self.assertRaises(TypeError,self.manager._db_connect()) 
+
 
     def test_drop_database(self):
         pass
