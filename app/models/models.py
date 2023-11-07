@@ -136,7 +136,7 @@ class Paient(User,Mixinsearch):
     @classmethod
     def get_visit_time(cls):
         try:
-            dict_time = db.search_empty_time()
+            dict_time = hospital_db.search_empty_time()
             for num, time in dict_time.items():
                 print(num, ":", time)
             choice_num = input("Please enter a number to get: ")
@@ -184,6 +184,8 @@ class Paient(User,Mixinsearch):
 
         except KeyError:
             print("there isn't any doctor for entered name :")
+
+            
     @classmethod
     def show_visit_time():
         user_name = input("Please enter your username: ")
@@ -310,7 +312,7 @@ class Medical_Record(Paient):
 
         except Exception as e:
             logger.error(f"Error displaying visit history for patient ID {patient_id}: {str(e)}")
-        return
+            return None
 
 
 def show_log_info():
