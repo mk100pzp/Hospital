@@ -64,7 +64,7 @@ class Mixinsearch:
             role_list.append
             return hospital_db.select(role.role_list.append("users"),
                                       on_conditions=[("users.user_id",f"{role}.users_user_id")],
-             join_type= "INNER JOIN", printed= False)
+                                      join_type= "INNER JOIN", printed= False)
 
         except Exception as e:
             logger.error(f"Error retrieving {role} information: {str(e)}")
@@ -95,7 +95,7 @@ class Doctor(User,Mixinsearch):
             user_name=input("please enter a user name: ")
             user_pass=input("please enter a password: ")
             str_information=hospital_db.select(table_name=["users","doctors","visit_dates"], select_options=["visit_price","count(visit_id)"],
-               filter_options= ["users_name","=",user_name,"patients_patient_id","IS NOT"," NULL"],group_options= ["visit_dates.doctors_doctor_id"],
+               filter_options= ["users_name","=",user_name,"patients_patient_id","IS NOT","NULL"],group_options= ["visit_dates.doctors_doctor_id"],
                on_conditions= [("users.suer_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")], join_type= "INNER JOIN")
             list_information=str_information.split(", ")
             income=list_information[0]*list_information[1]
@@ -103,6 +103,8 @@ class Doctor(User,Mixinsearch):
 
         except Exception as e:
             print(f"An error occurred: {e}")
+
+
         
 
 
@@ -121,13 +123,6 @@ class Paient(User,Mixinsearch):
             hospital_db.select(table_name=["users","patients","visit_dates","visit_forms","doctors"], 
                                select_options=["visit_forms.visit_form_id","visit_forms.from_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","visit_forms.visit_dates_id",'doctors.doctor_name'],
                order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",username)],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER JOIN",printed=True )
-            visit_form = db.search_visit_form(username, password)
-            if visit_form:
-                print("Visit Form Information:")
-                for key, value in visit_form.items():
-                    print(f"{key}: {value}")
-            else:
-                print("Visit Form not found.")
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -161,42 +156,35 @@ class Paient(User,Mixinsearch):
 
 
 
-    """def cancel_visit_time():
-        hospital_db.select(table_name=["patients","visit_dates","visit_forms"], 
-                            on_conditions= [("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.visit_date_id","Visit_forms.visit_dates.visit_date_id")], join_type= "INNER")
+    # def cancel_visit_time():
+    #     hospital_db.select(table_name=["patients","visit_dates","visit_forms"], 
+    #                         on_conditions= [("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.visit_date_id","Visit_forms.visit_dates.visit_date_id")], join_type= "INNER")
         
-        input_time = input("Please enter time for canceling visit time : ")
-        paient_name = input("Please enter your name")   
+    #     input_time = input("Please enter time for canceling visit time : ")
+    #     paient_name = input("Please enter your name")   
         
-        hospital_db.delete_from_table(table_name="visit_form", condition=visit_forms.visit_form_id=)"""
+    #     hospital_db.delete_from_table(table_name="visit_form", condition=visit_forms.visit_form_id=)
 
         
+
     @classmethod
     def search_patient_information(cls):
-        # creat patient obj with input information then call show_patient_information from database module
-        dict_information=cls.get_information()
-        try:
-            print(f"""
-            user id= {dict_information['user_id']}
-            user name= {dict_information['user_name']}
-            user password= {dict_information['user_pass']}
-            user email= {dict_information['user_email']}
-            user mobile= {dict_information['user_mobile']}
-            patient id= {dict_information['patient_id']}
-            patient name= {dict_information['patient_name']}
-            patient address= {dict_information['patient_address']}
-            """)
-
-        except KeyError:
-            print("there isn't any doctor for entered name :")
+        dict_information=cls.get_information("patients")
+        if dict_information:
+            print(dict_information)
+        else:
+            print("No patient information found for the entered name.")
 
 
     @classmethod
     def show_visit_time():
-        user_name = input("Please enter your username: ")
-        password = input("Please enter your password: ")
-        dict_time=db.Database.cached_visit_time(user_name,password)
-        print(dict_time)
+
+        hospital_db.select(table_name=["visit_dates","doctors"],
+                            select_options=["visit_dates.visit_id","visit_dates.visit_date_time","doctors.doctor_name"],
+                            filter_options=[("patients.patient_id","IS","NULL")],
+                            on_conditions=[("visit_dates.doctors_doctor_id","doctors.doctor_id")],
+                            join_type= "INNER JOIN",printed=True)
+
         
 
 
@@ -209,15 +197,17 @@ class Visit_Form:
 
     @staticmethod
     def show_number_visit():
-        doctor_id = input("Please enter doctor id : ")
-        patient_id = input("Please enter patient id : ")
-        dict_visit=db.Database.search_number_visit(doctor_id,patient_id)
-        print(dict_visit)
+            patient_id = input("Please Enter patient_id  : ")
+            doctor_id = input("Please Enter doctor_id  : ")
+            hospital_db.select(table_name=["visit_dates"], 
+                               select_options=["COUNT(visit_id)"],
+               filter_options=[("visit_dates.patients_patient_id","=",patient_id),("visit_dates.doctors_doctor_id","=",doctor_id)],printed=True )
+        
 
 
         
 
-    
+
     
 class Visit_Date:
     def __init__(self,username,password, visit_date_time,patient_id="Null"):
@@ -226,24 +216,26 @@ class Visit_Date:
         self.visit_date_time = visit_date_time
         self.patient_id = patient_id
 
-    @staticmethod
-    def create_visit_date():
-        username=input("please enter your username :")
-        password=input("please enter your password :")
-        visit_date=input("please enter visit date like '07/01/2019 07:00:00': ")
-        obj=Visit_Date(username,password, visit_date)
-        if db.add_visit_time(obj):
-            print("Adding visit time successfully")
-        else:
-            print("please try again!")
+    # @staticmethod
+    # def create_visit_date():
+    #     username=input("please enter your username :")
+    #     password=input("please enter your password :")
+    #     visit_date=input("please enter visit date like '07/01/2019 07:00:00': ")
+    #     obj=Visit_Date(username,password, visit_date)
+    #     if db.add_visit_time(obj):
+    #         print("Adding visit time successfully")
+    #     else:
+    #         print("please try again!")
     
-    @classmethod
-    def remove_visit_time():
-        id_visit_time=input("please enter id_visit_time: ")
-        if db.remove_visit_time(id_visit_time):
-            print("Adding visit time successfully")
-        else:
-            print("please try again!")
+# ========================================================================================================
+
+    # @classmethod
+    # def remove_visit_time():
+    #     id_visit_time=input("please enter id_visit_time: ")
+    #     if db.remove_visit_time(id_visit_time):
+    #         print("Adding visit time successfully")
+    #     else:
+    #         print("please try again!")
 
 
 
@@ -266,14 +258,12 @@ class Paient_Bill(Paient):
                             select_options=["paients.paient_name","paient_bills.date","paient_bills.paient_share","paient_bills.amount_paid","paient_bills.the_remaining_amount","paient_bills.insurance_contribution"],
                             filter_options=[("users.user_name","=",user_name)],
                             on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","paient_bills.patients_patient_id")], join_type= "INNER",printed=True)
-        
 
-        dict_bill=db.Database.search_bill(user_name, password)
-        print(dict_bill)
 
     def show_income_hospital():
-        income=db.Database.search_income()
-        print(income)
+
+        hospital_db.select(table_name=["paient_bills"], select_options=["SUM(amount_paid)"], printed=True)
+
 
 
     
@@ -314,18 +304,14 @@ class Medical_Record(Paient):
 
    
 
-    def display_visit_history(self, patient_id):
-        try:
-            db_connection, db_cursor = db.Database()._db_connect()
-            query = "SELECT COUNT(*) FROM doctor_visit WHERE patient_id = %s"
-            db_cursor.execute(query, (patient_id,))
-            visit_count = db_cursor.fetchone()[0]
-            db.Database()._close()
-            print(f"Patient with ID {patient_id} has been visited {visit_count} times.")
+    def display_visit_history(self):
+        user_name = input("Please Enter your username : ")
 
-        except Exception as e:
-            logger.error(f"Error displaying visit history for patient ID {patient_id}: {str(e)}")
-            return None
+        hospital_db.select(table_name=["patients","visit_dates","doctors","visit_forms"], 
+                            select_options=["visit_forms.form_id","visit_forms.medical_record_record_id","visit_forms.visit_form_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","doctors.doctor_name"],
+                            filter_options=[("patients.patient_id","=",user_name)],
+                            on_conditions= [("patients.patient_id","visit_dates.patient_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id"),("visit_dates.visit_id","visit_forms.visit_dates_id")], join_type= "INNER",printed=True)
+
 
 
 def show_log_info():
