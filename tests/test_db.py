@@ -3,6 +3,8 @@ import os
 import sys
 from unittest.mock import Mock
 from app.database.db import DbPostgresManager
+from pgmock import MockConnection, connect, pgmock
+
 
 project_root = os.path.abspath(os.path.dirname(__file__))
 child_directory =os.path.join(os.path.join(project_root, 'app'),'database')

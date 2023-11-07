@@ -120,7 +120,7 @@ class Paient(User,Mixinsearch):
             password = input("Please enter your password: ")
             hospital_db.select(table_name=["users","patients","visit_dates","visit_forms","doctors"], 
                                select_options=["visit_forms.visit_form_id","visit_forms.from_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","visit_forms.visit_dates_id",'doctors.doctor_name'],
-               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",username)],on_conditions= [("users.suer_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER JOIN",printed=True )
+               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",username)],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER JOIN",printed=True )
             visit_form = db.search_visit_form(username, password)
             if visit_form:
                 print("Visit Form Information:")
@@ -132,7 +132,7 @@ class Paient(User,Mixinsearch):
         except Exception as e:
             print(f"An error occurred: {e}")
 
-
+# ==================================================================================================================
     @classmethod
     def get_visit_time(cls):
         try:
@@ -157,14 +157,19 @@ class Paient(User,Mixinsearch):
 
         except Exception as e:
             print(f"An error occurred: {e}")
+# ==================================================================================================================
 
 
-    def cancel_visit_time():
-        id_visit=input("Please enter id of your visit time")
-        if db.cancel_visit_time(id_visit):
-            print("your visit time cancelled! ")
-        else:
-            print("please try again later")
+
+    """def cancel_visit_time():
+        hospital_db.select(table_name=["patients","visit_dates","visit_forms"], 
+                            on_conditions= [("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.visit_date_id","Visit_forms.visit_dates.visit_date_id")], join_type= "INNER")
+        
+        input_time = input("Please enter time for canceling visit time : ")
+        paient_name = input("Please enter your name")   
+        
+        hospital_db.delete_from_table(table_name="visit_form", condition=visit_forms.visit_form_id=)"""
+
         
     @classmethod
     def search_patient_information(cls):
@@ -185,7 +190,7 @@ class Paient(User,Mixinsearch):
         except KeyError:
             print("there isn't any doctor for entered name :")
 
-            
+
     @classmethod
     def show_visit_time():
         user_name = input("Please enter your username: ")
@@ -243,8 +248,9 @@ class Visit_Date:
 
 
 
-class Paient_Bill:
+class Paient_Bill(Paient):
     def __init__(self, date, total_amount, paient_share, amount_paid, the_remaining_amount, insurance_contribution):
+        Paient.__init__(self,patient_id)
         self.amount_paid = amount_paid
         self.the_remaining_amount = the_remaining_amount
         self.date = date
@@ -255,6 +261,13 @@ class Paient_Bill:
     def show_bill():
         user_name = input("Please enter your username: ")
         password = input("Please enter your password: ")
+
+        hospital_db.select(table_name=["users","patients","paient_bills"], 
+                            select_options=["paients.paient_name","paient_bills.date","paient_bills.paient_share","paient_bills.amount_paid","paient_bills.the_remaining_amount","paient_bills.insurance_contribution"],
+                            filter_options=[("users.user_name","=",user_name)],
+                            on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","paient_bills.patients_patient_id")], join_type= "INNER",printed=True)
+        
+
         dict_bill=db.Database.search_bill(user_name, password)
         print(dict_bill)
 
