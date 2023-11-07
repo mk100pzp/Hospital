@@ -95,7 +95,7 @@ class Doctor(User,Mixinsearch):
             user_name=input("please enter a user name: ")
             user_pass=input("please enter a password: ")
             str_information=hospital_db.select(table_name=["users","doctors","visit_dates"], select_options=["visit_price","count(visit_id)"],
-               filter_options= ["users_name","=",user_name,"patients_patient_id","IS NOT","NULL"],group_options= ["visit_dates.doctors_doctor_id"],
+               filter_options= [("users_name","=",user_name),("patients_patient_id","IS NOT","NULL")],group_options= ["visit_dates.doctors_doctor_id"],
                on_conditions= [("users.suer_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")], join_type= "INNER JOIN")
             list_information=str_information.split(", ")
             income=list_information[0]*list_information[1]
@@ -130,28 +130,22 @@ class Paient(User,Mixinsearch):
 # ==================================================================================================================
     @classmethod
     def get_visit_time(cls):
-        try:
-            dict_time = hospital_db.search_empty_time()
-            for num, time in dict_time.items():
-                print(num, ":", time)
-            choice_num = input("Please enter a number to get: ")
-            
-            if choice_num in dict_time:
-                dict_choice_time = dict_time[choice_num]
-                visit_id = dict_choice_time["visit_id"]
-                user_name = input("Please enter your username: ")
-                password = input("Please enter your password: ")
-                
-                if db.save_visit_time(visit_id, user_name, password):
-                    print("Your visit time is saved.")
-                else:
-                    print("Sorry, please try again later.")
-            else:
-                print("Please enter the right number.")
-                cls.get_visit_time()
+        str_empty_time=hospital_db.select(table_name=["visit_dates"], 
+        select_options=["visit_time"],
+        filter_options=[("patients_patient_id","IS","NULL")],printed=False )
+        list_empty_time=str_empty_time.split(", ")
+        for i in range(len(list_empty_time)):
+            print(f"{int(i)+1}-{list_empty_time[i]}")
+        time_index=int(input("please enter the number of time that you want to visit"))
+        choised_time=list_empty_time[time_index-1]
+        user_name=input("Please enter your user name: ")
+        id_patient=hospital_db.select(table_name=["patients","users"], 
+        select_options=["patients.patient_id"],
+        filter_options=[("users.user_name","=",user_name)],on_conditions=[("users.user_id","patients.users_user_id")], join_type="INNER JOIN",printed=False )
+        hospital_db.update_table("visit_dates", {"visit_time": choised_time}, [("patients_patient_id", "=", id_patient)])
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
+
+
 # ==================================================================================================================
 
 
@@ -276,25 +270,11 @@ class Paient_Bill():
 
     
     @classmethod
-    def calculate_total_income(cls, time_frame):
+    def calculate_total_income(cls):
         try:
-            current_date = datetime.now()
-            if time_frame == "daily":
-                start_date = current_date - datetime.timedelta(days=1)
-            elif time_frame == "weekly":
-                start_date = current_date - datetime.timedelta(days=7)
-            elif time_frame == "monthly":
-                start_date = current_date - datetime.timedelta(days=30)
-            else:
-                logging.error("Invalid time frame specified.")
-                return None
-
-            start_date_str = start_date.strftime("%Y-%m-%d")
-            current_date_str = current_date.strftime("%Y-%m-%d")
-
-            total_income = db.calculate_total_income(start_date_str, current_date_str)
-            logging.info(f"Total income for the {time_frame} time frame: ${total_income}")
-            return total_income
+            hospital_db.select(table_name=["patient_bills"], 
+            select_options=["sum(amount_paid)"],
+            printed=True )
 
         except Exception as e:
             logging.error(f"An error occurred: {e}")

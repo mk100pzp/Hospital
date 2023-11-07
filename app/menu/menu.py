@@ -38,6 +38,11 @@ enter = [{
                             "function": [auth.Authentication.login_doctor],
                             "action": [models.Visit_Date.remove_visit_time]
                         },
+                         {
+                            "name": "show all visit time",
+                            "function": [auth.Authentication.login_doctor],
+                            "action": [models.Visit_Date.show_doctor_time]
+                        },
 
                     ]
 
