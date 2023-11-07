@@ -216,6 +216,15 @@ class Visit_Date:
         self.visit_date_time = visit_date_time
         self.patient_id = patient_id
 
+    def show_doctor_time():
+        user_name = input("Please enter your username: ")
+
+        hospital_db.select(table_name=["users","doctors","visit_dates"],
+                            select_options=["visit_dates.visit_id","visit_dates.visit_date_time","patients.patient_id"],
+                            filter_options=[("users.user_name","=",user_name)],
+                            on_conditions=[("users.user_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")],
+                            join_type= "INNER JOIN",printed=True)
+
     # @staticmethod
     # def create_visit_date():
     #     username=input("please enter your username :")
@@ -240,9 +249,8 @@ class Visit_Date:
 
 
 
-class Paient_Bill(Paient):
+class Paient_Bill():
     def __init__(self, date, total_amount, paient_share, amount_paid, the_remaining_amount, insurance_contribution):
-        Paient.__init__(self,patient_id)
         self.amount_paid = amount_paid
         self.the_remaining_amount = the_remaining_amount
         self.date = date
@@ -296,9 +304,8 @@ class Paient_Bill(Paient):
     
     
 
-class Medical_Record(Paient):
-    def __init__(self, patient_name,record_id, record_date):
-        Paient.__init__(self,patient_name)
+class Medical_Record():
+    def __init__(self,record_id, record_date):
         self.record_id = record_id
         self.record_date = record_date
 
