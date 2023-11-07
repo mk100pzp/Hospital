@@ -5,7 +5,6 @@ from app.database.db import DbPostgresManager
 
 class TestModels(unittest.TestCase):
 
-    # Initialize a test database connection and create tables
     @patch('app.database.db.DbPostgresManager')
     def setUp(self, MockDbManager):
         self.mock_db_manager = MockDbManager.return_value
@@ -14,7 +13,6 @@ class TestModels(unittest.TestCase):
         self.mock_db_manager.return_value.creat_table.return_value = True
 
 
-    # Clean up the test database and close the connection
     def tearDown(self):
         self.db_manager.drop_database('test_hospital')
 
