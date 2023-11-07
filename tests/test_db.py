@@ -47,12 +47,28 @@ class TestStringMethods(unittest.TestCase):
             self.assertIsNone(self.manager._db_connect())
             self.assertRaises(TypeError,self.manager._db_connect()) 
 
-
     def test_drop_database(self):
         pass
 
     def test_create_table(self):
-        pass
+    # Test the excuting the query for creat table 
+        with unittest.mock.patch('psycopg2.connect') as mock_connect:
+            mock_conn = Mock()
+            mock_cur = Mock()
+            mock_conn.cursor.return_value = mock_cur
+            mock_connect.return_value = mock_conn 
+            self.manager._close = Mock()
+            self.manager.reade_file=Mock()
+            self.manager.config=Mock()
+            self.manager.reade_file.sections.return_value=["table1","table2"]
+            self.manager.config.return_value=[{'column1': 'int', 'column2': 'varchar(50)'},
+                {'column3': 'text', 'column4': 'boolean'}]
+            try:
+                self.manager.create_table()    
+            except Exception as e:
+                self.fail(f"Code execution resulted in an error: {e}")
+            
+        
 
     def test_drop_table(self):
         pass
