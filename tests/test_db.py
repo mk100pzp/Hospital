@@ -25,8 +25,6 @@ class TestStringMethods(unittest.TestCase):
     def test_connection_database(self):
            result=self.manager.connection_database()
            self.assertEqual(result["dbname"], 'test_db') 
-           psycopg2.connect= Mock()
-           cur=psycopg2.connect.cursor
            self.manager.dbname='checkingtest_db'
            result=self.manager.connection_database()
            self.assertNotEqual(result["dbname"], 'test_db') 

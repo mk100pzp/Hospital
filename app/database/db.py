@@ -345,8 +345,8 @@ first_db = DbPostgresManager()
 #                       ["kaveh", "789", "sara@gmail.com", 9124568675])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", 9338693536])
-first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
-                      ["fariba", "saveh", 4])
+# first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
+#                       ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
 #                       ["shima", "1234", "shima@gmail.com", "09338693536"])
 # first_db.insert_table("doctors", ["expertis", "work_experience", "adress", "visit_price"],
@@ -363,10 +363,10 @@ first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user
 #                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
 # first_db.select(table_name=["users", "patients",], select_options=["user_name", "user_email", "user_pass", "patient_name"],
 #                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
-first_db.select(table_name=["users", "patients", "visit_dates"],
-                select_options=["user_name", "user_email", "user_pass", "patient_name", "visit_time"],
-                on_conditions=[("users.user_id", "patients.users_user_id"),
-                               ("patients.patient_id", "visit_dates.patients_patient_id")], join_type="INNER", )
+# first_db.select(table_name=["users", "patients", "visit_dates"],
+#                 select_options=["user_name", "user_email", "user_pass", "patient_name", "visit_time"],
+#                 on_conditions=[("users.user_id", "patients.users_user_id"),
+#                                ("patients.patient_id", "visit_dates.patients_patient_id")], join_type="INNER", )
 # show -----------------------------------
 # first_db.show_table("users")
 # delete -----------------------------------
