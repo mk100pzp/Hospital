@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_test', password=None, tables='hospital.ini'):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_v1', password=None, tables='hospital.ini'):
         self.table_name = None
         self.select_columns = None
         self.data = None
@@ -106,24 +106,29 @@ class DbPostgresManager:
             self.close()
         except Error as err:
             print(err)
-    def insert_old_datafile(self, file_name: str='user_accounts.xlsx'):
-        self._db_connect() 
-        try:
-            all_tables = self.reade_file(self.tables).sections()
-            for table_name in all_tables:
-                output_file += f"{table_name}.csv"
-                with open(output_file, newline='') as csvfile:
-                    reader = csv.reader(csvfile)
-                    next(reader)
-                    for row in reader:
-                        self.insert_table(table_name , reader[0], row)
-                output_file='exported_'
-                print(f"export {table_name} table datas successfully")
-        except Exception as e:
-            return f"Error exporting data: {str(e)}"
-        finally:
-            self._close()
-        return f"Exported tables to {output_file} successfully"
+
+    # def insert_old_datafile(self, file_name: str='exported_'):
+    #     self._db_connect() 
+    #     try:
+    #         all_tables = self.reade_file(self.tables).sections()
+    #         for table_name in all_tables:
+    #             file_name += f"{table_name}.csv"
+    #             with open(file_name,"r" ,newline='') as csvfile:
+    #                 print("1")
+    #                 reader = csv.reader(csvfile)
+    #                 # print(reader)
+    #                 next(reader)
+    #                 # print(reader[0])
+    #                 for row in reader:
+    #                     self.insert_table(table_name , reader[0], row)
+    #             output_file='exported_'
+    #             print(f"export {table_name} table datas successfully")
+    #     except Exception as e:
+    #         return f"Error exporting data: {str(e)}"
+    #     finally:
+    #         self.close()
+    #     return f"Exported tables to {output_file} successfully"
+    
 
     def export_tables_to_csv(self, output_file: str='exported_'):
         self._db_connect() 
@@ -131,13 +136,13 @@ class DbPostgresManager:
             all_tables = self.reade_file(self.tables).sections()
             for table_name in all_tables:
                 output_file += f"{table_name}.csv"
-                self.__cur.execute(f"SELECT * FROM {table_name}")
-                results = self.__cur.fetchall()
+                self.cur.execute(f"SELECT * FROM {table_name}")
+                results = self.cur.fetchall()
                 rows_table = [list(item) for item in results]
                 print(rows_table)
                 with open(output_file, "w", newline="") as csvfile:
                     csvwriter = csv.writer(csvfile,delimiter=',') 
-                    headers = [desc[0] for desc in self.__cur.description]
+                    headers = [desc[0] for desc in self.cur.description]
                     csvwriter.writerow(headers)  
                     csvwriter.writerows(rows_table)
                     print(f"export {table_name} table datas successfully")
@@ -145,7 +150,7 @@ class DbPostgresManager:
         except Exception as e:
             return f"Error exporting data: {str(e)}"
         finally:
-            self._close()
+            self.close()
         return f"Exported tables to {output_file} successfully"
 
     def create_table(self):
@@ -264,7 +269,7 @@ class DbPostgresManager:
         join_clause = ''
         for table in range(len(table_name) - 1):
             join_clause += (f" {join_type} JOIN {table_name[table + 1]} ON "
-                            f"{on_conditions[table][table]} = {on_conditions[table][table]} ")
+                            f"{on_conditions[table][0]} = {on_conditions[table][1]} ")
         return join_clause
 
     def select(self, table_name: list, limit=None, select_options: list = None,
@@ -295,15 +300,17 @@ class DbPostgresManager:
         try:
             self._db_connect()
             query = "SELECT "
-            if select_options:
+            if len(select_options)>1:
                 query = query + ",".join(select_options)
+            elif len(select_options)==1:
+                query = query + select_options[0]
             else:
                 query = query + "*"
 
             if len(table_name) > 1:
                 query = query + " FROM " + table_name[0] + self.join_table(join_type, table_name, on_conditions)
             else:
-                query = query + " FROM " + ",".join(table_name) + " "
+                query = query + " FROM " + table_name[0] + " "
 
             if filter_options:
                 if len(filter_options) > 1:
@@ -323,7 +330,6 @@ class DbPostgresManager:
 
             self.cur.execute(query)
             self.data = self.cur.fetchall()
-            print(self.data)
             self.select_columns = [desc[0] for desc in self.cur.description]
             if printed== True:self.show_table(table_name)
             self.close()
@@ -381,19 +387,19 @@ class DbPostgresManager:
 
 
 # Test Case
-first_db = DbPostgresManager()
-first_db.export_tables_to_csv()
+# db = DbPostgresManager()
+# # first_db.export_tables_to_csv()
 
-first_db.create_table()
-first_db.insert_old_datafile()
-first_db.export_tables_to_csv()
+# db.create_table()
+# first_db.insert_old_datafile()
+# first_db.export_tables_to_csv()
 
 # first_db.drop_table("users")
 # insert---------------------------------
-first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-                      ["kaveh", "789", "sara@gmail.com", 9124568675])
-first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-                      ["shima", "1234", "shima@gmail.com", 9338693536])
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["kaveh", "789", "sara@gmail.com", 9124568675])
+# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+#                       ["shima", "1234", "shima@gmail.com", 9338693536])
 # first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
 #                       ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
@@ -411,7 +417,7 @@ first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mo
 # first_db.select(table_name=["users","patients"], select_options=["user_name", "user_email", "user_pass"],
 #                on_conditions=[("users.user_id", "patients.users_user_id")],printed=True)
 # first_db.select(table_name=["users", "patients",], select_options=["user_name", "user_email", "user_pass", "patient_name"],
-#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER JOIN",)
+#                 on_conditions=[("users.user_id", "patients.users_user_id")], join_type="INNER",)
 # first_db.select(table_name=["users", "patients", "visit_dates"],
 #                 select_options=["user_name", "user_email", "user_pass", "patient_name", "visit_time"],
 #                 on_conditions=[("users.user_id", "patients.users_user_id"),

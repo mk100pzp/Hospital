@@ -46,12 +46,12 @@ class Admin(User):
     def list_patients(self):
         hospital_db.select(self, table_name=["users","patients"],
                            on_conditions=[("users.user_id","patients.users_user_id")],
-                             join_type = "INNER JOIN", printed = True)
+                             join_type = "INNER", printed = True)
 
     def list_doctors(self):
         hospital_db.select(self, table_name=["users","doctors"],
                            on_conditions=[("users.user_id","doctors.users_user_id")],
-                             join_type = "INNER JOIN", printed = True)
+                             join_type = "INNER", printed = True)
 
     
 
@@ -64,7 +64,7 @@ class Mixinsearch:
             role_list.append
             return hospital_db.select(role.role_list.append("users"),
                                       on_conditions=[("users.user_id",f"{role}.users_user_id")],
-                                      join_type= "INNER JOIN", printed= False)
+                                      join_type= "INNER", printed= False)
 
         except Exception as e:
             print(f"Error retrieving {role} information: {str(e)}")
@@ -95,8 +95,8 @@ class Doctor(User,Mixinsearch):
             user_name=input("please enter a user name: ")
             user_pass=input("please enter a password: ")
             str_information=hospital_db.select(table_name=["users","doctors","visit_dates"], select_options=["visit_price","count(visit_id)"],
-               filter_options= [("users_name","=",user_name),("patients_patient_id","IS NOT","NULL")],group_options= ["visit_dates.doctors_doctor_id"],
-               on_conditions= [("users.suer_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")], join_type= "INNER JOIN")
+               filter_options= [("users_name","=",f'{user_name}'),("patients_patient_id","IS NOT","NULL")],group_options= ["visit_dates.doctors_doctor_id"],
+               on_conditions= [("users.suer_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")], join_type= "INNER")
             list_information=str_information.split(", ")
             income=list_information[0]*list_information[1]
             print(income)
@@ -122,7 +122,7 @@ class Paient(User,Mixinsearch):
             password = input("Please enter your password: ")
             hospital_db.select(table_name=["users","patients","visit_dates","visit_forms","doctors"], 
                                select_options=["visit_forms.visit_form_id","visit_forms.from_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","visit_forms.visit_dates_id",'doctors.doctor_name'],
-               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",username)],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER JOIN",printed=True )
+               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",f'{username}')],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER",printed=True )
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -141,8 +141,8 @@ class Paient(User,Mixinsearch):
         user_name=input("Please enter your user name: ")
         id_patient=hospital_db.select(table_name=["patients","users"], 
         select_options=["patients.patient_id"],
-        filter_options=[("users.user_name","=",user_name)],on_conditions=[("users.user_id","patients.users_user_id")], join_type="INNER JOIN",printed=False )
-        hospital_db.update_table("visit_dates", {"visit_time": choised_time}, [("patients_patient_id", "=", id_patient)])
+        filter_options=[("users.user_name","=",f"{user_name}")],on_conditions=[("users.user_id","patients.users_user_id")], join_type="INNER",printed=False )
+        hospital_db.update_table("visit_dates", {"visit_time": f"{choised_time}"}, [("patients_patient_id", "=", id_patient)])
 
 
 
@@ -177,7 +177,7 @@ class Paient(User,Mixinsearch):
                             select_options=["visit_dates.visit_id","visit_dates.visit_date_time","doctors.doctor_name"],
                             filter_options=[("patients.patient_id","IS","NULL")],
                             on_conditions=[("visit_dates.doctors_doctor_id","doctors.doctor_id")],
-                            join_type= "INNER JOIN",printed=True)
+                            join_type= "INNER",printed=True)
 
         
 
@@ -195,7 +195,7 @@ class Visit_Form:
             doctor_id = input("Please Enter doctor_id  : ")
             hospital_db.select(table_name=["visit_dates"], 
                                select_options=["COUNT(visit_id)"],
-               filter_options=[("visit_dates.patients_patient_id","=",patient_id),("visit_dates.doctors_doctor_id","=",doctor_id)],printed=True )
+               filter_options=[("visit_dates.patients_patient_id","=",f"{patient_id}"),("visit_dates.doctors_doctor_id","=",doctor_id)],printed=True )
         
 
 
@@ -215,9 +215,9 @@ class Visit_Date:
 
         hospital_db.select(table_name=["users","doctors","visit_dates"],
                             select_options=["visit_dates.visit_id","visit_dates.visit_date_time","patients.patient_id"],
-                            filter_options=[("users.user_name","=",user_name)],
+                            filter_options=[("users.user_name","=",f"{user_name}")],
                             on_conditions=[("users.user_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")],
-                            join_type= "INNER JOIN",printed=True)
+                            join_type= "INNER",printed=True)
 
     # @staticmethod
     # def create_visit_date():
@@ -258,7 +258,7 @@ class Paient_Bill():
 
         hospital_db.select(table_name=["users","patients","paient_bills"], 
                             select_options=["paients.paient_name","paient_bills.date","paient_bills.paient_share","paient_bills.amount_paid","paient_bills.the_remaining_amount","paient_bills.insurance_contribution"],
-                            filter_options=[("users.user_name","=",user_name)],
+                            filter_options=[("users.user_name","=",f"{user_name}")],
                             on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","paient_bills.patients_patient_id")], join_type= "INNER",printed=True)
 
 
@@ -296,7 +296,7 @@ class Medical_Record():
 
         hospital_db.select(table_name=["patients","visit_dates","doctors","visit_forms"], 
                             select_options=["visit_forms.form_id","visit_forms.medical_record_record_id","visit_forms.visit_form_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","doctors.doctor_name"],
-                            filter_options=[("patients.patient_id","=",user_name)],
+                            filter_options=[("patients.patient_id","=",f"{user_name}")],
                             on_conditions= [("patients.patient_id","visit_dates.patient_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id"),("visit_dates.visit_id","visit_forms.visit_dates_id")], join_type= "INNER",printed=True)
 
 

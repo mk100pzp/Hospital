@@ -2,6 +2,7 @@ from app.menu import menu
 import os
 import time
 
+
 class Menue:
     list_obj=[]
 
@@ -120,7 +121,7 @@ def display(obj):
                  
             else:
                     print ("your choise is not valid\n please enter a correct number")
-                    time.sleep(2)
+                    time.sleep(8)
                     display(obj)
 
 

@@ -60,7 +60,7 @@ class TestStringMethods(unittest.TestCase):
             mock_cur = Mock()
             mock_conn.cursor.return_value = mock_cur
             mock_connect.return_value = mock_conn
-            self.manager._close = Mock()
+            self.manager.close = Mock()
             self.manager.reade_file = Mock()
             self.manager.config = Mock()
             self.manager.reade_file.sections.return_value = ["table1", "table2"]
