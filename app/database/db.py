@@ -16,8 +16,8 @@ class DbPostgresManager:
         self.dbname = dbname
         self.password = password
         self.tables = tables
-        self.__conn = None
-        self.__cur = None
+        self.conn = None
+        self.cur = None
 
     @staticmethod
     def reade_file(filename):
@@ -57,24 +57,26 @@ class DbPostgresManager:
 
         try:
             params = self.connection_database()
-            self.__conn = psycopg2.connect(**params)
-            self.__cur = self.__conn.cursor()
-            return self.__conn, self.__cur
+            self.conn = psycopg2.connect(**params)
+            self.cur = self.conn.cursor()
+            return self.conn, self.cur
+        
         except Exception as error:
-            logging.error(
+
+            print(
                 f"Error: Could not connect to the {self.dbname} database. \n{error}"
             )
             return None
 
-    def _close(self):
+    def close(self):
         """
             Simple method that closes the connection.
         """
 
         try:
-            self.__conn.commit()
-            self.__cur.close()
-            self.__conn.close()
+            self.conn.commit()
+            self.cur.close()
+            self.conn.close()
 
         except Exception:
             print("---- Error closing database")
@@ -93,15 +95,15 @@ class DbPostgresManager:
         try:
             self._db_connect()
             iso_lvl = importlib.import_module("psycopg2.extensions").ISOLATION_LEVEL_AUTOCOMMIT
-            self.__conn.set_isolation_level(iso_lvl)
-            self.__cur = self.__conn.cursor()
-            self.__cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = dbname")
-            exists_db = self.__cur.fetchone()[0]
+            self.conn.set_isolation_level(iso_lvl)
+            self.cur = self.conn.cursor()
+            self.cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = dbname")
+            exists_db = self.cur.fetchone()[0]
             if not exists_db:
                 print(f"Db {dbname} Not Exists")
             else:
-                self.__cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
-            self._close()
+                self.cur.execute("DROP DATABASE IF EXISTS %s;" % dbname)
+            self.close()
         except Error as err:
             print(err)
     def insert_old_datafile(self, file_name: str='user_accounts.xlsx'):
@@ -153,8 +155,8 @@ class DbPostgresManager:
             columns = DbPostgresManager.config(self.tables, section=table)
             query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
                 (str(value[0]) + " " + str(value[1])) for value in columns.items()))
-            self.__cur.execute(query)
-        self._close()
+            self.cur.execute(query)
+        self.close()
         print("table create successfully")
 
     def drop_table(self, table_name):
@@ -168,9 +170,9 @@ class DbPostgresManager:
         """
         self._db_connect()
         query = f"DROP TABLE IF EXISTS {table_name} CASCADE;"
-        self.__cur.execute(query)
+        self.cur.execute(query)
         print("table drop..")
-        self._close()
+        self.close()
 
     def update_table(self, table_name, new_value: dict, condition: list):
         """
@@ -203,9 +205,9 @@ class DbPostgresManager:
                     query += f"WHERE {column} {operator} {value}"
             else:
                 query += ";"
-            self.__cur.execute(query)
+            self.cur.execute(query)
             print("data update in tables")
-            self._close()
+            self.close()
         except Error as err:
             print(err)
 
@@ -216,8 +218,8 @@ class DbPostgresManager:
             query += f"WHERE {condition};"
         else:
             query += ";"
-        self.__cur.execute(query)
-        self._close()
+        self.cur.execute(query)
+        self.close()
 
     def insert_table(self, table_name: str, col_name: list, col_value: list):
         """
@@ -240,11 +242,12 @@ class DbPostgresManager:
                 else:
                     new_col_value.append("'%s'" % value)
             query = f"INSERT INTO {table_name} ({','.join(columns)}) VALUES ({','.join(new_col_value)}) RETURNING {table_name[:-1]}_id"
-            self.__cur.execute(query)
+
+            self.cur.execute(query)
             print("data insert to table")
-            id = self.__cur.fetchone()
+            id = self.cur.fetchone()
             print("id = ", id[0])
-            self._close()
+            self.close()
         except Error as err:
             print(err)
 
@@ -318,12 +321,12 @@ class DbPostgresManager:
             else:
                 query += ";"
 
-            self.__cur.execute(query)
-            self.data = self.__cur.fetchall()
+            self.cur.execute(query)
+            self.data = self.cur.fetchall()
             print(self.data)
-            self.select_columns = [desc[0] for desc in self.__cur.description]
+            self.select_columns = [desc[0] for desc in self.cur.description]
             if printed== True:self.show_table(table_name)
-            self._close()
+            self.close()
             return self.data
         except Error as err:
             print(err)
@@ -370,9 +373,9 @@ class DbPostgresManager:
                 query += f"ALTER COLUMN {column_name} SET DATA TYPE {new_column_definition};"
             else:
                 print("Invalid action specified in alteration statement.")
-            self.__cur.execute(query)
+            self.cur.execute(query)
             print(f"Table '{table_name}' altered successfully.")
-            self._close()
+            self.close()
         except Error as err:
             print(err)
 
