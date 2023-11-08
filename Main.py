@@ -99,10 +99,10 @@ def display(obj):
         
             Menue.print(obj.child_list)
             number_choise=Menue.input()
-            print(number_choise)
+            
         
             name_choise=Menue.match_number_to_name(obj.child_list,int(number_choise)-1)
-            print(number_choise)
+            
             new_obj=Menue.find_obj(name_choise,obj.name)
         
             display(new_obj)
@@ -110,10 +110,11 @@ def display(obj):
             
             for func in obj.list_action_func:
                 func()
+            
     except (ValueError,IndexError):
             if number_choise=="b":
                 if obj.parent==None:
-                    print( "end")
+                    print("end")
                 else:
                     display(obj.parent)
             if number_choise=="e":

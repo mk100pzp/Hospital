@@ -120,9 +120,9 @@ class Paient(User,Mixinsearch):
         try:
             username = input("Please enter your username: ")
             password = input("Please enter your password: ")
-            hospital_db.select(table_name=["users","patients","visit_dates","visit_forms","doctors"], 
+            hospital_db.select(table_name=["users","patients","visit_dates","doctors","visit_forms"], 
                                select_options=["visit_forms.visit_form_id","visit_forms.from_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","visit_forms.visit_dates_id",'doctors.doctor_name'],
-               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",f'{username}')],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id")], join_type= "INNER",printed=True )
+               order_options= ["visit_dates.visit_time"],filter_options=[("users.user_name","=",f"'{username}'")],on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","visit_dates.patients_patient_id"),("visit_dates.doctors_doctor_id","doctors.doctor_id"),("visit_dates.patients_patient_id","patients.patient_id")], join_type= "INNER",printed=True )
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -130,20 +130,24 @@ class Paient(User,Mixinsearch):
 # ==================================================================================================================
     @classmethod
     def get_visit_time(cls):
-        str_empty_time=hospital_db.select(table_name=["visit_dates"], 
-        select_options=["visit_time"],
-        filter_options=[("patients_patient_id","IS","NULL")],printed=False )
-        list_empty_time=str_empty_time.split(", ")
-        for i in range(len(list_empty_time)):
-            print(f"{int(i)+1}-{list_empty_time[i]}")
-        time_index=int(input("please enter the number of time that you want to visit"))
-        choised_time=list_empty_time[time_index-1]
-        user_name=input("Please enter your user name: ")
-        id_patient=hospital_db.select(table_name=["patients","users"], 
-        select_options=["patients.patient_id"],
-        filter_options=[("users.user_name","=",f"{user_name}")],on_conditions=[("users.user_id","patients.users_user_id")], join_type="INNER",printed=False )
-        hospital_db.update_table("visit_dates", {"visit_time": f"{choised_time}"}, [("patients_patient_id", "=", id_patient)])
-
+        try:
+            str_empty_time=hospital_db.select(table_name=["visit_dates"], 
+            select_options=["visit_time"],
+            filter_options=[("patients_patient_id","IS","NULL")],printed=False )
+            list_empty_time=str_empty_time.split(", ")
+            print(list_empty_time)
+            for i in range(len(list_empty_time)):
+                print(f"{int(i)+1}-{list_empty_time[i]}")
+            time_index=int(input("please enter the number of time that you want to visit"))
+            choised_time=list_empty_time[time_index-1]
+            user_name=input("Please enter your user name: ")
+            id_patient=hospital_db.select(table_name=["patients","users"], 
+            select_options=["patients.patient_id"],
+            filter_options=[("users.user_name","=",f"{user_name}")],on_conditions=[("users.user_id","patients.users_user_id")], join_type="INNER",printed=False )
+            print(id_patient)
+            hospital_db.update_table("visit_dates", {"visit_time": f"{choised_time}"}, [("patients_patient_id", "=", id_patient)])
+        except Exception as e:
+            print(e)
 
 
 # ==================================================================================================================
@@ -170,14 +174,16 @@ class Paient(User,Mixinsearch):
             print("No patient information found for the entered name.")
 
 
-    @classmethod
+    @staticmethod
     def show_visit_time():
-
-        hospital_db.select(table_name=["visit_dates","doctors"],
-                            select_options=["visit_dates.visit_id","visit_dates.visit_date_time","doctors.doctor_name"],
-                            filter_options=[("patients.patient_id","IS","NULL")],
-                            on_conditions=[("visit_dates.doctors_doctor_id","doctors.doctor_id")],
-                            join_type= "INNER",printed=True)
+        try:
+            hospital_db.select(table_name=["visit_dates","doctors"],
+                                select_options=["visit_dates.visit_date_id","visit_dates.visit_time","doctors.doctor_name"],
+                                filter_options=[("visit_dates.visit_date_id","IS","NULL")],
+                                on_conditions=[("visit_dates.doctors_doctor_id","doctors.doctor_id")],
+                                join_type= "INNER",printed=True)
+        except Exception as e:
+            print(e)
 
         
 
@@ -212,12 +218,13 @@ class Visit_Date:
 
     def show_doctor_time():
         user_name = input("Please enter your username: ")
+        
+        hospital_db.select(table_name=["users","doctors","visit_dates","patients"],
+                            select_options=["visit_dates.visit_date_id","visit_dates.visit_time","patients.patient_name"],
+                            filter_options=[("users.user_name","=",f"'{user_name}'")],
+                            on_conditions=[("users.user_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id"),("visit_dates.patients_patient_id","patients.patient_id")],
+                            join_type= "INNER",printed=True)
 
-        print(hospital_db.select(table_name=["users","doctors","visit_dates","patients"],
-                            select_options=["visit_dates.visit_date_id","visit_dates.visit_time","visit_dates.patients_patient_id"],
-                            filter_options=[("users.user_name","=",f"{user_name}")],
-                            on_conditions=[("users.user_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")],
-                            join_type= "INNER",printed=True))
         
 
     # @staticmethod
@@ -256,11 +263,12 @@ class Paient_Bill():
     def show_bill():
         user_name = input("Please enter your username: ")
         password = input("Please enter your password: ")
-
+        
         hospital_db.select(table_name=["users","patients","patient_bills"], 
                             select_options=["patients.patient_name","patient_bills.date","patient_bills.patient_share","patient_bills.amount_paid","patient_bills.the_remaining_amount","patient_bills.insurance_contribution"],
-                            filter_options=[("users.user_name","=",f'{user_name}')],
+                            filter_options=[("users.user_name","=",f"'{user_name}'")],
                             on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","patient_bills.patients_patient_id")], join_type= "INNER",printed=True)
+        
 
 
     def show_income_hospital():
@@ -294,7 +302,7 @@ class Medical_Record():
 
     def display_visit_history(self):
         user_name = input("Please Enter your username : ")
-
+        
         hospital_db.select(table_name=["patients","visit_dates","doctors","visit_forms"], 
                             select_options=["visit_forms.form_id","visit_forms.medical_record_record_id","visit_forms.visit_form_name","visit_forms.visit_desc","visit_forms.hospitalization","visit_forms.duration_of_hospitalization","doctors.doctor_name"],
                             filter_options=[("patients.patient_id","=",f"{user_name}")],
