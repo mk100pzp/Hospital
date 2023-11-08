@@ -4,11 +4,13 @@ from psycopg2 import Error
 import logging
 import importlib
 import csv
+import os
 import pandas as pd
 
-
+database_file= os.path.dirname(os.path.realpath(__file__))
+# tables=os.path.join(database_file, 'hospital.ini')
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_v1', password=None, tables='hospital.ini'):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_v2', password=None, tables='hospital.ini'):
         self.table_name = None
         self.select_columns = None
         self.data = None
@@ -107,27 +109,34 @@ class DbPostgresManager:
         except Error as err:
             print(err)
 
-    # def insert_old_datafile(self, file_name: str='exported_'):
-    #     self._db_connect() 
-    #     try:
-    #         all_tables = self.reade_file(self.tables).sections()
-    #         for table_name in all_tables:
-    #             file_name += f"{table_name}.csv"
-    #             with open(file_name,"r" ,newline='') as csvfile:
-    #                 print("1")
-    #                 reader = csv.reader(csvfile)
-    #                 # print(reader)
-    #                 next(reader)
-    #                 # print(reader[0])
-    #                 for row in reader:
-    #                     self.insert_table(table_name , reader[0], row)
-    #             output_file='exported_'
-    #             print(f"export {table_name} table datas successfully")
-    #     except Exception as e:
-    #         return f"Error exporting data: {str(e)}"
-    #     finally:
-    #         self.close()
-    #     return f"Exported tables to {output_file} successfully"
+    def insert_old_datafile(self, file_name: str='exported_'):
+        # self._db_connect() 
+        try:
+            all_tables = self.reade_file(self.tables).sections()
+            
+            for table_name in all_tables:
+                file_name += f"{table_name}.csv"
+                print(file_name)
+                file_path = os.path.join(database_file,file_name)
+                if os.path.exists(file_path):
+                    with open(file_path, "r" ,newline='') as csvfile:
+                        readers = csv.reader(csvfile)
+                        header_row=next(readers)    
+                        column_titles = header_row
+                        column_titles_list = column_titles[0].split('\x1b') 
+                        for row in readers:
+                            row_list = row[0].split('\x1b')
+                            self.insert_table(table_name , column_titles_list, row_list)
+                        file_name='exported_'
+                        print(f"export {table_name} table datas successfully")
+                else:
+                    print(f"The file {table_name} does not exist.")
+
+        except Exception as e:
+            return f"Error importing data: {str(e)}"
+        finally:
+            pass
+            return f"imported tables to database successfully"
     
 
     def export_tables_to_csv(self, output_file: str='exported_'):
@@ -387,12 +396,12 @@ class DbPostgresManager:
 
 
 # Test Case
-# db = DbPostgresManager()
-# # first_db.export_tables_to_csv()
+first_db = DbPostgresManager()
+# # # first_db.export_tables_to_csv()
 
-# db.create_table()
-# first_db.insert_old_datafile()
-# first_db.export_tables_to_csv()
+# first_db.create_table()
+first_db.insert_old_datafile()
+first_db.export_tables_to_csv()
 
 # first_db.drop_table("users")
 # insert---------------------------------
