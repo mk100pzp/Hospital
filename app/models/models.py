@@ -1,6 +1,6 @@
 import datetime
 import logging
-from venv import logger
+# from venv import logger
 import os
 import sys
 from pathlib import Path
@@ -40,7 +40,7 @@ class Admin(User):
             print("New admin added successfully!")
 
         except Exception as e:
-            logger.error(f"Error adding a new admin: {str(e)}")
+            print(f"Error adding a new admin: {str(e)}")
 
 
     def list_patients(self):
@@ -67,7 +67,7 @@ class Mixinsearch:
                                       join_type= "INNER JOIN", printed= False)
 
         except Exception as e:
-            logger.error(f"Error retrieving {role} information: {str(e)}")
+            print(f"Error retrieving {role} information: {str(e)}")
             return {}
     
 class Doctor(User,Mixinsearch):
@@ -277,7 +277,7 @@ class Paient_Bill():
             printed=True )
 
         except Exception as e:
-            logging.error(f"An error occurred: {e}")
+            print(f"An error occurred: {e}")
             return None
 
     
