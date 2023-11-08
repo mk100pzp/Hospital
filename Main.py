@@ -123,7 +123,7 @@ def display(obj):
                  
             else:
                     print ("your choise is not valid\n please enter a correct number")
-                    time.sleep(8)
+                    time.sleep(5)
                     display(obj)
 
 

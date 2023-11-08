@@ -9,7 +9,7 @@ import csv
 database_file = os.path.dirname(os.path.realpath(__file__))
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult=os.path.join(database_file, 'database.ini'), dbname='db_hospital_v1', password=None, tables=os.path.join(database_file, 'hospital.ini')):
+    def __init__(self, dbps_defult=os.path.join(database_file, 'database.ini'), dbname='db_hospital_v2', password=None, tables=os.path.join(database_file, 'hospital.ini')):
         self.table_name = None
         self.select_columns = None
         self.data = None
@@ -425,9 +425,10 @@ class DbPostgresManager:
 fdb = DbPostgresManager()
 # # first_db.export_tables_to_csv()
 
-fdb.create_table()
-fdb.insert_old_datafile()
+# fdb.create_table()
 fdb.export_tables_to_csv()
+fdb.insert_old_datafile()
+
 
 
 # first_db.drop_table("users")
