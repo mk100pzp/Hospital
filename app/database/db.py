@@ -1,16 +1,15 @@
 from configparser import ConfigParser
+import os
 import psycopg2
 from psycopg2 import Error
 import logging
 import importlib
 import csv
-import os
-import pandas as pd
 
-database_file= os.path.dirname(os.path.realpath(__file__))
-# tables=os.path.join(database_file, 'hospital.ini')
+database_file = os.path.dirname(os.path.realpath(__file__))
+
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_v2', password=None, tables='hospital.ini'):
+    def __init__(self, dbps_defult=os.path.join(database_file, 'database.ini'), dbname='db_hospital_v2', password=None, tables=os.path.join(database_file, 'hospital.ini')):
         self.table_name = None
         self.select_columns = None
         self.data = None
@@ -29,7 +28,7 @@ class DbPostgresManager:
         return parser
 
     @staticmethod
-    def config(filename="database.ini", section=None):
+    def config(filename=os.path.join(database_file, 'hospital.ini'), section=None):
         parser = DbPostgresManager.reade_file(filename)
         if parser.has_section(section):
             db_config = dict(parser.items(section))
@@ -161,17 +160,44 @@ class DbPostgresManager:
         finally:
             self.close()
         return f"Exported tables to {output_file} successfully"
+    
+
+    def export_tables_to_csv(self, output_file: str='exported_'):
+        self._db_connect() 
+        try:
+            all_tables = self.reade_file(self.tables).sections()
+            for table_name in all_tables:
+                output_file += f"{table_name}.csv"
+                self.cur.execute(f"SELECT * FROM {table_name}")
+                results = self.cur.fetchall()
+                rows_table = [list(item) for item in results]
+                print(rows_table)
+                with open(output_file, "w", newline="") as csvfile:
+                    csvwriter = csv.writer(csvfile,delimiter=',') 
+                    headers = [desc[0] for desc in self.cur.description]
+                    csvwriter.writerow(headers)  
+                    csvwriter.writerows(rows_table)
+                    print(f"export {table_name} table datas successfully")
+                    output_file='exported_'
+        except Exception as e:
+            return f"Error exporting data: {str(e)}"
+        finally:
+            self.close()
+        return f"Exported tables to {output_file} successfully"
 
     def create_table(self):
         self._db_connect()
         all_tables = DbPostgresManager.reade_file(self.tables).sections()
+        
         for table in all_tables:
             columns = DbPostgresManager.config(self.tables, section=table)
+            
             query = "CREATE TABLE IF NOT EXISTS {0} ({1});".format(table, ", ".join(
                 (str(value[0]) + " " + str(value[1])) for value in columns.items()))
+            print(query)
             self.cur.execute(query)
         self.close()
-        print("table create successfully")
+        
 
     def drop_table(self, table_name):
         """
@@ -396,12 +422,14 @@ class DbPostgresManager:
 
 
 # Test Case
-first_db = DbPostgresManager()
-# # # first_db.export_tables_to_csv()
+fdb = DbPostgresManager()
+# # first_db.export_tables_to_csv()
 
-# first_db.create_table()
-first_db.insert_old_datafile()
-first_db.export_tables_to_csv()
+# fdb.create_table()
+fdb.export_tables_to_csv()
+fdb.insert_old_datafile()
+
+
 
 # first_db.drop_table("users")
 # insert---------------------------------
@@ -442,3 +470,4 @@ first_db.export_tables_to_csv()
 
 
 # filter_options=[("patient_id", "=", "5")]
+

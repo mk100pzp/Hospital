@@ -213,11 +213,12 @@ class Visit_Date:
     def show_doctor_time():
         user_name = input("Please enter your username: ")
 
-        hospital_db.select(table_name=["users","doctors","visit_dates"],
-                            select_options=["visit_dates.visit_id","visit_dates.visit_date_time","patients.patient_id"],
+        print(hospital_db.select(table_name=["users","doctors","visit_dates","patients"],
+                            select_options=["visit_dates.visit_date_id","visit_dates.visit_time","visit_dates.patients_patient_id"],
                             filter_options=[("users.user_name","=",f"{user_name}")],
                             on_conditions=[("users.user_id","doctors.users_user_id"),("doctors.doctor_id","visit_dates.doctors_doctor_id")],
-                            join_type= "INNER",printed=True)
+                            join_type= "INNER",printed=True))
+        
 
     # @staticmethod
     # def create_visit_date():
@@ -256,15 +257,15 @@ class Paient_Bill():
         user_name = input("Please enter your username: ")
         password = input("Please enter your password: ")
 
-        hospital_db.select(table_name=["users","patients","paient_bills"], 
-                            select_options=["paients.paient_name","paient_bills.date","paient_bills.paient_share","paient_bills.amount_paid","paient_bills.the_remaining_amount","paient_bills.insurance_contribution"],
-                            filter_options=[("users.user_name","=",f"{user_name}")],
-                            on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","paient_bills.patients_patient_id")], join_type= "INNER",printed=True)
+        hospital_db.select(table_name=["users","patients","patient_bills"], 
+                            select_options=["patients.patient_name","patient_bills.date","patient_bills.patient_share","patient_bills.amount_paid","patient_bills.the_remaining_amount","patient_bills.insurance_contribution"],
+                            filter_options=[("users.user_name","=",f'{user_name}')],
+                            on_conditions= [("users.user_id","patients.users_user_id"),("patients.patient_id","patient_bills.patients_patient_id")], join_type= "INNER",printed=True)
 
 
     def show_income_hospital():
 
-        hospital_db.select(table_name=["paient_bills"], select_options=["SUM(amount_paid)"], printed=True)
+        hospital_db.select(table_name=["patient_bills"], select_options=["SUM(amount_paid)"], printed=True)
 
 
 

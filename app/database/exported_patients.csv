@@ -1,6 +1,10 @@
-patient_idpatient_namepatient_adressusers_user_id
-1samieishirazi str1
-2radsari str2
-3havasisatarkhan str5
-4ahoeidibaji7
-5mahmoudiponak6
+patient_id,patient_name,patient_adress,users_user_id
+,samiei,shirazi str,1
+,arian,sari str,2
+,havasi,satarkhan str,5
+,ahoei,dibaji,7
+,mahmoudi,ponak,6
+,zamani,vank,7
+,rezaee,mashhad,3
+,farhadi,karaj,8
+,saman,shvaz,9
