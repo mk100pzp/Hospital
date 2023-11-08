@@ -3,10 +3,12 @@ import psycopg2
 from psycopg2 import Error
 import logging
 import importlib
+import csv
+import pandas as pd
 
 
 class DbPostgresManager:
-    def __init__(self, dbps_defult="database.ini", dbname='db_hospital', password=None, tables='hospital.ini'):
+    def __init__(self, dbps_defult="database.ini", dbname='db_hospital_test', password=None, tables='hospital.ini'):
         self.table_name = None
         self.select_columns = None
         self.data = None
@@ -102,6 +104,47 @@ class DbPostgresManager:
             self._close()
         except Error as err:
             print(err)
+    def insert_old_datafile(self, file_name: str='user_accounts.xlsx'):
+        self._db_connect() 
+        try:
+            all_tables = self.reade_file(self.tables).sections()
+            for table_name in all_tables:
+                output_file += f"{table_name}.csv"
+                with open(output_file, newline='') as csvfile:
+                    reader = csv.reader(csvfile)
+                    next(reader)
+                    for row in reader:
+                        self.insert_table(table_name , reader[0], row)
+                output_file='exported_'
+                print(f"export {table_name} table datas successfully")
+        except Exception as e:
+            return f"Error exporting data: {str(e)}"
+        finally:
+            self._close()
+        return f"Exported tables to {output_file} successfully"
+
+    def export_tables_to_csv(self, output_file: str='exported_'):
+        self._db_connect() 
+        try:
+            all_tables = self.reade_file(self.tables).sections()
+            for table_name in all_tables:
+                output_file += f"{table_name}.csv"
+                self.__cur.execute(f"SELECT * FROM {table_name}")
+                results = self.__cur.fetchall()
+                rows_table = [list(item) for item in results]
+                print(rows_table)
+                with open(output_file, "w", newline="") as csvfile:
+                    csvwriter = csv.writer(csvfile,delimiter=',') 
+                    headers = [desc[0] for desc in self.__cur.description]
+                    csvwriter.writerow(headers)  
+                    csvwriter.writerows(rows_table)
+                    print(f"export {table_name} table datas successfully")
+                    output_file='exported_'
+        except Exception as e:
+            return f"Error exporting data: {str(e)}"
+        finally:
+            self._close()
+        return f"Exported tables to {output_file} successfully"
 
     def create_table(self):
         self._db_connect()
@@ -336,15 +379,18 @@ class DbPostgresManager:
 
 # Test Case
 first_db = DbPostgresManager()
+first_db.export_tables_to_csv()
 
-# first_db.create_table()
+first_db.create_table()
+first_db.insert_old_datafile()
+first_db.export_tables_to_csv()
 
 # first_db.drop_table("users")
 # insert---------------------------------
-# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-#                       ["kaveh", "789", "sara@gmail.com", 9124568675])
-# first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
-#                       ["shima", "1234", "shima@gmail.com", 9338693536])
+first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+                      ["kaveh", "789", "sara@gmail.com", 9124568675])
+first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
+                      ["shima", "1234", "shima@gmail.com", 9338693536])
 # first_db.insert_table("patients", ["patient_name", "patient_adress", "users_user_id"],
 #                       ["fariba", "saveh", 4])
 # first_db.insert_table("users", ["user_name", "user_pass", "user_email", "user_mobil"],
