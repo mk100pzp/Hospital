@@ -27,11 +27,9 @@ enter = [{
                 {
                     "name": "doctor",
 
-                    "children": [
-
-                         {
-                            "name": "show all visit time",
+                    "children": [{
                             "function": [auth.Authentication.login],
+                            "name": "show all visit time",
                             "action": [models.Visit_Date.show_doctor_time]
                         },
 

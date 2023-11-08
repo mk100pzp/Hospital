@@ -99,9 +99,10 @@ def display(obj):
         
             Menue.print(obj.child_list)
             number_choise=Menue.input()
+            print(number_choise)
         
             name_choise=Menue.match_number_to_name(obj.child_list,int(number_choise)-1)
-            
+            print(number_choise)
             new_obj=Menue.find_obj(name_choise,obj.name)
         
             display(new_obj)
