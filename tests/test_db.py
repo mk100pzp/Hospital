@@ -27,10 +27,10 @@ class TestStringMethods(unittest.TestCase):
            self.manager.dbname='checkingtest_db'
            result=self.manager.connection_database()
            self.assertNotEqual(result["dbname"], 'test_db') 
+           result=self.manager.connection_database()
+           self.assertEqual(result["dbname"], 'checkingtest_db') 
 
-    def tearDown(self):
-        self.manager.dbname='test_db'
-    
+
     def test_db_connect(self):
         with unittest.mock.patch('psycopg2.connect') as mock_connect:
             mock_conn = Mock()
@@ -90,7 +90,10 @@ class TestStringMethods(unittest.TestCase):
 
     def test_alter_table(self):
         pass
-
+    
+    def tearDown(self):
+        self.manager.dbname='test_db'
+        self.manager.config.reset_mock()
 
 
 
