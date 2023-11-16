@@ -22,6 +22,6 @@ class Doctors(UserAbs):
     address = models.TextField()
     expertise = models.CharField(max_length=50)
     work_experienc = models.IntegerField()
-    visit_price = models.DecimalField()
+    visit_price = models.DecimalField(max_digits=20, decimal_places=2)
     
 
