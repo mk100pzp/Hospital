@@ -1,0 +1,5 @@
+doctor_id,doctor_name,expertis,work_experience,adress,visit_price,users_user_id
+,samiei,general doctor,5,hospital_A,100,1
+,mahmoudi,heart,6,hospital_A,150,6
+,rezaei,sychology,12,hospital_A,110,3
+,zamani,dermatologist,4,hospital_A,130,4

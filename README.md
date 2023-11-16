@@ -38,3 +38,8 @@ The structure :
 |   |-- test_menu.py
 
 |-- Main.py
+
+
+## erd diagram:
+
+<p align="center"><img src="https://s6.uupload.ir/files/erd_wif.png" alt="erd_diagram"> </p>
