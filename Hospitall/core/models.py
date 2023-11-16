@@ -18,6 +18,9 @@ class UserAbs(models.Model):
 class Patients(UserAbs):
     address = models.TextField()
 
+    def __str__(self) :
+        return f"{self.user.username}"
+
 class Doctors(UserAbs):
     address = models.TextField()
     expertise = models.CharField(max_length=50)

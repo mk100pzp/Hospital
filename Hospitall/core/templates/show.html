@@ -1,0 +1,42 @@
+{% extends 'base.html' %} 
+
+{% load static %}
+
+    {% block tilte %}Hospital A{% endblock %}
+    
+
+{% url 'posts:all' %}
+                    
+
+
+
+
+    <!-- Content Block -->
+    <div class="container mt-4">
+        {% block content %} 
+
+            {% if all %}
+                        
+                {% for patient in all%} 
+                    <a href="">
+                        {{ patient }}
+                    </a>
+                    <br>
+                    <br>
+                    
+                        
+
+                {% endfor %}
+            {% endif %}
+        {% endblock %}
+    </div>
+
+
+
+
+
+    <!-- Footer -->
+  
+        &copy; {% now "Y" %} Your Site Name. All rights reserved.
+
+
