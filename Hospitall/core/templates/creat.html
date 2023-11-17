@@ -1,0 +1,33 @@
+{% extends 'base.html' %} 
+
+{% load static %}
+
+    {% block tilte %}create{% endblock %}
+    
+
+
+                    
+
+
+
+
+    <!-- Content Block -->
+    
+        {% block content %} 
+
+           <form>
+           {{ form.as_p}}
+           </form>
+
+           
+        {% endblock %}
+    
+
+
+
+
+    <!-- Footer -->
+  
+        &copy; {% now "Y" %} Your Site Name. All rights reserved.
+
+
